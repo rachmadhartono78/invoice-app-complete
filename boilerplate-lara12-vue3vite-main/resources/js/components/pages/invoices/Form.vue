@@ -136,6 +136,14 @@
                             ✓ {{ it.item_name }}
                         </div>
                     </div>
+                            class="absolute top-full left-0 right-0 mt-1 border border-gray-300 bg-white rounded z-10 px-2 py-2 text-xs text-gray-500 shadow-lg">
+                            No items found
+                        </div>
+                        <!-- Display selected item -->
+                        <div v-if="it.item_id" class="text-xs text-blue-600 mt-1">
+                            ✓ {{ it.item_name }}
+                        </div>
+                    </div>
                     <div>
                         <label class="block text-xs">Code</label
                         ><input
@@ -277,7 +285,7 @@
     </div>
 </template>
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from '../../../api/dashboardAxios';
 const route = useRoute();
@@ -286,7 +294,7 @@ const id = route.params.id;
 const nextInvoiceNumber = ref(null);
 const masterItems = ref([]); // Master items list for dropdown
 const errors = ref({});
-const itemSearch = ref({}); // Track search for each item row
+const itemSearch = reactive({}); // Track search for each item row - using reactive for proper reactivity
 
 const f = ref({
     invoice_number: '',
@@ -345,89 +353,67 @@ const terbilangPlaceholder = computed(() => terbilangIndo(Math.round(total.value
 function terbilangIndo(n) {
     if (!n && n !== 0) return '';
     
-    // Round to nearest rupiah (no cents in Indonesian currency)
     n = Math.round(n);
-    if (n < 0) n = Math.abs(n); // Handle negative
+    if (n < 0) n = Math.abs(n);
+    if (n === 0) return 'nol rupiah';
     
     const ones = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan'];
-    const teens = ['sepuluh', 'sebelas', 'dua belas', 'tiga belas', 'empat belas', 'lima belas', 'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas'];
     const tens = ['', '', 'dua puluh', 'tiga puluh', 'empat puluh', 'lima puluh', 'enam puluh', 'tujuh puluh', 'delapan puluh', 'sembilan puluh'];
+    const teens = ['sepuluh', 'sebelas', 'dua belas', 'tiga belas', 'empat belas', 'lima belas', 'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas'];
+    const scale = ['', 'ribu', 'juta', 'milyar'];
     
     function convertBelowThousand(num) {
         if (num === 0) return '';
         
         let result = '';
+        const h = Math.floor(num / 100);
+        const t = Math.floor((num % 100) / 10);
+        const o = num % 10;
         
-        // Hundreds
-        const hundreds = Math.floor(num / 100);
-        if (hundreds === 1) {
-            result = 'seratus';
-        } else if (hundreds > 1) {
-            result = ones[hundreds] + ' ratus';
+        if (h > 0) {
+            if (h === 1) result += 'seratus';
+            else result += ones[h] + ' ratus';
         }
         
-        // Tens and Ones
-        const remainder = num % 100;
-        if (remainder === 0) {
-            return result;
-        }
-        
-        if (result) result += ' ';
-        
-        if (remainder < 10) {
-            // Only single digit (1-9)
-            result += ones[remainder];
-        } else if (remainder < 20) {
-            // Teen numbers (10-19)
-            result += teens[remainder - 10];
-        } else {
-            // 20 and above
-            const tenDigit = Math.floor(remainder / 10);
-            const oneDigit = remainder % 10;
-            
-            result += tens[tenDigit];
-            
-            if (oneDigit > 0) {
-                result += ' ' + ones[oneDigit];
-            }
+        if (t === 0 && o > 0) {
+            if (result) result += ' ';
+            result += ones[o];
+        } else if (t === 1) {
+            if (result) result += ' ';
+            result += teens[o];
+        } else if (t > 1) {
+            if (result) result += ' ';
+            result += tens[t];
+            if (o > 0) result += ' ' + ones[o];
         }
         
         return result;
     }
     
-    if (n === 0) return 'nol rupiah';
-    
     let parts = [];
+    let scaleIndex = 0;
     
-    // Milyar (billions)
-    const milyar = Math.floor(n / 1000000000);
-    if (milyar > 0) {
-        const milyarText = convertBelowThousand(milyar);
-        parts.push(milyarText + ' milyar');
-    }
-    
-    // Juta (millions)
-    const juta = Math.floor((n % 1000000000) / 1000000);
-    if (juta > 0) {
-        const jutaText = convertBelowThousand(juta);
-        parts.push(jutaText + ' juta');
-    }
-    
-    // Ribu (thousands)
-    const ribu = Math.floor((n % 1000000) / 1000);
-    if (ribu > 0) {
-        const ribuText = convertBelowThousand(ribu);
-        if (ribu === 1) {
-            parts.push('seribu');
-        } else {
-            parts.push(ribuText + ' ribu');
+    while (n > 0 && scaleIndex < scale.length) {
+        const chunk = n % 1000;
+        
+        if (chunk > 0) {
+            let chunkText = convertBelowThousand(chunk);
+            
+            if (scaleIndex === 1 && chunk === 1) {
+                parts.unshift('seribu');
+            } else if (scaleIndex === 2 && chunk === 1) {
+                parts.unshift('satu juta');
+            } else if (scaleIndex === 3 && chunk === 1) {
+                parts.unshift('satu milyar');
+            } else if (scale[scaleIndex]) {
+                parts.unshift(chunkText + ' ' + scale[scaleIndex]);
+            } else {
+                parts.unshift(chunkText);
+            }
         }
-    }
-    
-    // Satuan (ones/hundreds/tens below 1000)
-    const satuan = n % 1000;
-    if (satuan > 0) {
-        parts.push(convertBelowThousand(satuan));
+        
+        n = Math.floor(n / 1000);
+        scaleIndex++;
     }
     
     return parts.join(' ') + ' rupiah';
@@ -501,7 +487,7 @@ const selectItem = (index, event) => {
 };
 
 const getFilteredItems = (index) => {
-    const search = (itemSearch.value[index] || '').toLowerCase();
+    const search = (itemSearch[index] || '').toLowerCase();
     if (!search) return [];
     
     return masterItems.value.filter(item => 
@@ -522,7 +508,7 @@ const selectItemFromSearch = (index, item) => {
     }
     
     // Clear search after selection
-    itemSearch.value[index] = '';
+    itemSearch[index] = '';
 };
 
 const addNewItem = () => {
@@ -535,22 +521,24 @@ const addNewItem = () => {
         unit_price: 0,
         discount: 0,
     });
-    itemSearch.value[newIndex] = ''; // Initialize search for new item
+    itemSearch[newIndex] = ''; // Initialize search for new item
 };
 
 const deleteItem = (index) => {
     f.value.items.splice(index, 1);
     // Clean up itemSearch when item is deleted
     const newSearch = {};
-    Object.keys(itemSearch.value).forEach((key) => {
+    Object.keys(itemSearch).forEach((key) => {
         const idx = parseInt(key);
         if (idx < index) {
-            newSearch[idx] = itemSearch.value[idx];
+            newSearch[idx] = itemSearch[idx];
         } else if (idx > index) {
-            newSearch[idx - 1] = itemSearch.value[idx];
+            newSearch[idx - 1] = itemSearch[idx];
         }
     });
-    itemSearch.value = newSearch;
+    // Clear old keys and set new ones
+    Object.keys(itemSearch).forEach(key => delete itemSearch[key]);
+    Object.assign(itemSearch, newSearch);
 };
 
 onMounted(async () => {
