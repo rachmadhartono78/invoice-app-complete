@@ -203,8 +203,10 @@
                 </div>
             </div>
             <div>
-                <label class="block mb-1">Terbilang (amount in words)</label>
-                <input v-model="f.terbilang" :placeholder="terbilangPlaceholder" class="border px-3 py-2 rounded w-full" />
+                <label class="block mb-1">Terbilang (amount in words) - Auto-calculated from total</label>
+                <div class="border px-3 py-2 rounded w-full bg-blue-50 text-sm">
+                    {{ terbilangPlaceholder }}
+                </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -218,7 +220,7 @@
             </div>
             <div>
                 <label class="block mb-1">Notes / Keterangan</label>
-                <textarea v-model="f.keterangan" class="border px-3 py-2 rounded w-full" rows="4"></textarea>
+                <textarea v-model="f.notes" class="border px-3 py-2 rounded w-full" rows="4"></textarea>
             </div>
             <div class="text-right text-xl font-bold">
                 Total: {{ fmt(total) }}
@@ -255,8 +257,8 @@ const f = ref({
     invoice_number: '',
     invoice_date: new Date().toISOString().split("T")[0],
     currency_name: 'Indonesian Rupiah',
+    notes: '',
     terbilang: '',
-    keterangan: '',
     prepared_by: '',
     approved_by: '',
     customer_name: "",
@@ -279,14 +281,27 @@ const f = ref({
     ],
 });
 const total = computed(() => {
-    const sub = f.value.items.reduce(
-        (s, it) =>
-            s + (it.quantity || 0) * (it.unit_price || 0) - (it.discount || 0),
+    // Subtotal: sum of all items (qty × price - discount)
+    const subtotal = f.value.items.reduce(
+        (s, it) => s + ((it.quantity || 0) * (it.unit_price || 0) - (it.discount || 0)),
         0,
     );
-    const afterDis = sub - (f.value.discount || 0);
-    const ppn = (afterDis * (f.value.ppn_percent || 0)) / 100;
-    return afterDis + ppn + (f.value.other_charges || 0);
+    
+    // After invoice-level discount
+    const afterDiscount = subtotal - (f.value.discount || 0);
+    
+    // PPN calculation (on afterDiscount amount)
+    const ppn = (afterDiscount * (f.value.ppn_percent || 0)) / 100;
+    
+    // Final total with other charges
+    return afterDiscount + ppn + (f.value.other_charges || 0);
+});
+
+const subtotal = computed(() => {
+    return f.value.items.reduce(
+        (s, it) => s + ((it.quantity || 0) * (it.unit_price || 0) - (it.discount || 0)),
+        0,
+    );
 });
 const fmt = (n) => new Intl.NumberFormat("id").format(n);
 
@@ -294,35 +309,101 @@ const terbilangPlaceholder = computed(() => terbilangIndo(Math.round(total.value
 
 function terbilangIndo(n) {
     if (!n && n !== 0) return '';
-    const angka = ["","satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan","sepuluh","sebelas"];
-    function inWords(n) {
-        n = Math.floor(n);
-        if (n < 12) return angka[n];
-        if (n < 20) return inWords(n - 10) + ' belas';
-        if (n < 100) return inWords(Math.floor(n / 10)) + ' puluh' + (n % 10 ? ' ' + inWords(n % 10) : '');
-        if (n < 200) return 'seratus' + (n - 100 ? ' ' + inWords(n - 100) : '');
-        if (n < 1000) return inWords(Math.floor(n / 100)) + ' ratus' + (n % 100 ? ' ' + inWords(n % 100) : '');
-        if (n < 2000) return 'seribu' + (n - 1000 ? ' ' + inWords(n - 1000) : '');
-        if (n < 1000000) return inWords(Math.floor(n / 1000)) + ' ribu' + (n % 1000 ? ' ' + inWords(n % 1000) : '');
-        if (n < 1000000000) return inWords(Math.floor(n / 1000000)) + ' juta' + (n % 1000000 ? ' ' + inWords(n % 1000000) : '');
-        return inWords(Math.floor(n / 1000000000)) + ' milyar' + (n % 1000000000 ? ' ' + inWords(n % 1000000000) : '');
+    
+    // Round to nearest rupiah (no cents in Indonesian currency)
+    n = Math.round(n);
+    
+    const ones = ["","satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan"];
+    const teens = ["sepuluh","sebelas","dua belas","tiga belas","empat belas","lima belas","enam belas","tujuh belas","delapan belas","sembilan belas"];
+    const tens = ["","","dua puluh","tiga puluh","empat puluh","lima puluh","enam puluh","tujuh puluh","delapan puluh","sembilan puluh"];
+    
+    function convertBelowThousand(num) {
+        let result = "";
+        
+        const hundreds = Math.floor(num / 100);
+        if (hundreds > 0) {
+            if (hundreds === 1) {
+                result = "seratus";
+            } else {
+                result = ones[hundreds] + " ratus";
+            }
+        }
+        
+        const remainder = num % 100;
+        if (remainder > 0) {
+            if (result) result += " ";
+            
+            if (remainder < 10) {
+                result += ones[remainder];
+            } else if (remainder < 20) {
+                result += teens[remainder - 10];
+            } else {
+                const t = Math.floor(remainder / 10);
+                const o = remainder % 10;
+                result += tens[t];
+                if (o > 0) {
+                    result += " " + ones[o];
+                }
+            }
+        }
+        
+        return result;
     }
-    if (n === 0) return 'nol';
-    return inWords(n) + ' rupiah';
+    
+    if (n === 0) return "nol rupiah";
+    
+    let result = "";
+    
+    // Milyar (billions)
+    const milyar = Math.floor(n / 1000000000);
+    if (milyar > 0) {
+        result = convertBelowThousand(milyar) + " milyar";
+    }
+    
+    // Juta (millions)
+    const juta = Math.floor((n % 1000000000) / 1000000);
+    if (juta > 0) {
+        if (result) result += " ";
+        result += convertBelowThousand(juta) + " juta";
+    }
+    
+    // Ribu (thousands)
+    const ribu = Math.floor((n % 1000000) / 1000);
+    if (ribu > 0) {
+        if (result) result += " ";
+        if (ribu === 1) {
+            result += "seribu";
+        } else {
+            result += convertBelowThousand(ribu) + " ribu";
+        }
+    }
+    
+    // Satuan (ones)
+    const satuan = n % 1000;
+    if (satuan > 0) {
+        if (result) result += " ";
+        result += convertBelowThousand(satuan);
+    }
+    
+    return result.trim() + " rupiah";
 }
 const save = async () => {
+    const sub = subtotal.value;
+    const afterDisc = sub - (f.value.discount || 0);
+    const ppnAmt = (afterDisc * (f.value.ppn_percent || 0)) / 100;
+    const tot = afterDisc + ppnAmt + (f.value.other_charges || 0);
+    
     const data = {
         ...f.value,
-        subtotal: f.value.items.reduce(
-            (s, it) =>
-                s +
-                (it.quantity || 0) * (it.unit_price || 0) -
-                (it.discount || 0),
-            0,
-        ),
-        ppn_amount: total.value,
-        total: total.value,
+        subtotal: sub,
+        discount: f.value.discount || 0,
+        ppn_percent: f.value.ppn_percent || 0,
+        ppn_amount: ppnAmt,
+        other_charges: f.value.other_charges || 0,
+        total: tot,
+        terbilang: terbilangIndo(Math.round(tot)),
     };
+    
     id
         ? await axios.put(`invoices/${id}`, data)
         : await axios.post("invoices", { ...data, invoice_number: f.value.invoice_number || null });

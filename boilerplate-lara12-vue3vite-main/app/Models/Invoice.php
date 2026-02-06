@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model {
     use SoftDeletes;
-    protected $fillable = ['invoice_number','invoice_date','customer_name','customer_address','payment_terms','expedition','po_number','delivery_date','currency','subtotal','discount','ppn_percent','ppn_amount','other_charges','total','notes','prepared_by','approved_by','status'];
+    protected $fillable = ['invoice_number','invoice_date','customer_name','customer_address','payment_terms','expedition','po_number','delivery_date','currency','subtotal','discount','ppn_percent','ppn_amount','other_charges','total','notes','terbilang','prepared_by','approved_by','status'];
     protected $casts = ['invoice_date'=>'date','delivery_date'=>'date','subtotal'=>'decimal:2','discount'=>'decimal:2','ppn_percent'=>'decimal:2','ppn_amount'=>'decimal:2','other_charges'=>'decimal:2','total'=>'decimal:2'];
     
     public function items() { return $this->hasMany(InvoiceItem::class); }
