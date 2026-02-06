@@ -190,36 +190,38 @@
         </section>
 
         <!-- Section Tentang Aplikasi di bawah -->
-        <section class="w-full py-8 px-4 bg-white dark:bg-gray-800 ">
+        <section class="w-full py-12 px-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
             <div class="max-w-4xl mx-auto text-center">
-                <h2 class="text-2xl font-bold mb-2 text-primary-600">Tentang ECOS E-Logbook</h2>
-                <p class="text-gray-700 dark:text-gray-300 mb-4">ECOS E-Logbook adalah aplikasi pencatatan digital untuk
-                    mendukung proses belajar, bertumbuh, dan melayani di lingkungan pendidikan dan rumah sakit. Fitur
-                    utama
-                    meliputi pencatatan aktivitas, monitoring rotasi, dan integrasi SSO UII.</p>
-                <div class="flex flex-wrap justify-center gap-6 mt-4">
-                    <div class="flex flex-col items-center w-40">
-                        <svg class="w-10 h-10 text-primary-600 mb-2" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path d="M12 8v4l3 3" />
+                <h2 class="text-3xl font-bold mb-4 text-green-700 dark:text-green-400">🍽️ Tentang PT EDO MANDIRI PRATAMA</h2>
+                <p class="text-gray-700 dark:text-gray-300 mb-6 text-lg leading-relaxed">PT EDO MANDIRI PRATAMA adalah perusahaan procurement terdepan yang berkomitmen menyediakan <strong>kebutuhan makan bergizi gratis</strong> dan <strong>peralatan makan profesional</strong> berkualitas tinggi. Kami menerapkan prinsip <strong>Efisiensi, Transparansi, dan Akuntabilitas</strong> dalam setiap proses pengadaan untuk mendukung kesehatan dan operasional perusahaan Anda secara optimal.</p>
+                <div class="flex flex-wrap justify-center gap-6 mt-8">
+                    <div class="flex flex-col items-center w-48 p-4 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition">
+                        <svg class="w-12 h-12 text-green-600 dark:text-green-400 mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="font-semibold">Pencatatan Mudah</span>
+                        <span class="font-bold text-green-700 dark:text-green-400">Efisiensi Maksimal</span>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Proses pengadaan yang optimal dengan biaya efektif</p>
                     </div>
-                    <div class="flex flex-col items-center w-40">
-                        <svg class="w-10 h-10 text-primary-600 mb-2" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path d="M5 13l4 4L19 7" />
+                    <div class="flex flex-col items-center w-48 p-4 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition">
+                        <svg class="w-12 h-12 text-green-600 dark:text-green-400 mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="font-semibold">Monitoring Rotasi</span>
+                        <span class="font-bold text-green-700 dark:text-green-400">Transparansi Penuh</span>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Setiap transaksi terdokumentasi dan dapat dipertanggungjawabkan</p>
                     </div>
-                    <div class="flex flex-col items-center w-40">
-                        <svg class="w-10 h-10 text-primary-600 mb-2" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 6v6l4 2" />
+                    <div class="flex flex-col items-center w-48 p-4 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition">
+                        <svg class="w-12 h-12 text-green-600 dark:text-green-400 mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        <span class="font-semibold">Integrasi SSO UII</span>
+                        <span class="font-bold text-green-700 dark:text-green-400">Delivery On-Time</span>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 mt-2">Pengiriman tepat waktu dengan penanganan profesional</p>
                     </div>
+                </div>
+                <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        📞 Hubungi kami: <span class="font-semibold text-green-700 dark:text-green-400">087878381090 (BAGUS) | 087787620888 (AEN/ICA)</span>
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500 mt-2">Buka 24 Jam | Tangerang Selatan, Banten</p>
                 </div>
             </div>
         </section>

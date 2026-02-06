@@ -1,123 +1,147 @@
 <template>
     <div>
         <!-- Hero Section -->
-        <section class="bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
-            <div class="py-12 px-4 mx-auto max-w-screen-xl text-center lg:py-20">
+        <section class="bg-gradient-to-br from-green-500 via-green-400 to-emerald-500 dark:from-gray-900 dark:to-gray-800">
+            <div class="py-12 px-4 mx-auto max-w-screen-xl text-center lg:py-24">
                 <div class="mb-6 inline-block">
-                    <span class="text-4xl font-bold text-green-700">🍽️</span>
+                    <span class="text-5xl font-bold">🍽️</span>
                 </div>
-                <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-                    PT Edo Mandiri Pratama
+                <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-white md:text-5xl lg:text-6xl dark:text-white">
+                    PT EDO MANDIRI PRATAMA
                 </h1>
-                <p class="mb-2 text-xl font-semibold text-green-700 dark:text-green-400">
-                    Nutrisi Berkualitas untuk Kehidupan Lebih Sehat
+                <p class="mb-2 text-2xl font-bold text-yellow-100 dark:text-yellow-200">
+                    🌿 Pengadaan Kebutuhan Bergizi Gratis 🌿
                 </p>
-                <p class="mb-8 text-lg font-normal text-gray-600 lg:text-xl sm:px-16 lg:px-48 dark:text-gray-400">
-                    Menyediakan layanan catering bergizi dan terpercaya untuk kebutuhan dapur makan Anda. 
-                    Komitmen kami adalah kesehatan dan kepuasan setiap pelanggan dengan standar kebersihan dan kualitas terbaik.
+                <p class="mb-6 text-lg font-semibold text-white max-w-3xl mx-auto leading-relaxed">
+                    Selamat datang! Kami adalah perusahaan procurement terdepan yang berkomitmen menyediakan kebutuhan makan bergizi berkualitas tinggi dan peralatan makan profesional dengan standar terbaik.
                 </p>
-                <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0">
+                <div class="mb-8 bg-white/20 backdrop-blur-md rounded-lg p-6 max-w-2xl mx-auto border-2 border-white/30">
+                    <p class="text-white text-base leading-relaxed">
+                        Kami menerapkan prinsip <span class="font-bold text-yellow-100">Efisiensi, Transparansi, dan Akuntabilitas</span> dalam setiap proses pengadaan. 
+                        Setiap barang dan jasa yang kami peroleh melewati verifikasi ketat untuk memastikan <span class="font-bold text-yellow-100">kualitas optimal</span> 
+                        dan mendukung operasional Anda secara sempurna.
+                    </p>
+                </div>
+                <div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 gap-4">
                     <router-link
                         to="/app/auth"
-                        class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 dark:focus:ring-green-900"
+                        class="inline-flex justify-center items-center py-3 px-6 text-base font-medium text-center text-green-700 rounded-lg bg-white hover:bg-yellow-50 focus:ring-4 focus:ring-green-300 dark:focus:ring-green-900 shadow-lg transform hover:scale-105 transition"
                     >
-                        Pesan Sekarang
+                        📋 Akses Dashboard
                         <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
                         </svg>
                     </router-link>
                     <a
                         href="#layanan"
-                        class="inline-flex justify-center items-center py-3 px-5 sm:ms-4 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
+                        class="inline-flex justify-center items-center py-3 px-6 text-base font-medium text-center text-white rounded-lg border-2 border-white hover:bg-white/20 focus:ring-4 focus:ring-white dark:text-white dark:border-white dark:hover:bg-white/10 dark:focus:ring-white shadow-lg transform hover:scale-105 transition"
                     >
-                        Lihat Layanan
+                        🔍 Lihat Layanan Kami
                     </a>
                 </div>
             </div>
         </section>
 
         <!-- Features Section -->
-        <section id="layanan" class="bg-gray-50 dark:bg-gray-800">
-            <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
-                <div class="max-w-screen-md mb-8 lg:mb-16">
+        <section id="layanan" class="bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800">
+            <div class="py-12 px-4 mx-auto max-w-screen-xl sm:py-20 lg:px-6">
+                <div class="max-w-3xl mx-auto mb-12 lg:mb-20 text-center">
                     <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">
-                        Layanan Kami
+                        🎯 Layanan & Komitmen Kami
                     </h2>
-                    <p class="text-gray-600 sm:text-xl dark:text-gray-400">
-                        Solusi catering profesional dengan fokus pada nutrisi, kualitas, dan kepuasan pelanggan.
+                    <p class="text-gray-700 sm:text-xl dark:text-gray-300 leading-relaxed">
+                        Kami menyediakan solusi pengadaan lengkap mulai dari kebutuhan makan bergizi gratis, peralatan makan profesional, hingga layanan konsultasi pengadaan. Setiap layanan dirancang dengan standar efisiensi, transparansi, dan akuntabilitas tinggi.
                     </p>
                 </div>
                 <div class="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:space-y-0">
-                    <div>
-                        <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
-                            <span class="text-2xl">🥗</span>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg hover:shadow-xl transition border-l-4 border-green-500">
+                        <div class="flex justify-center items-center mb-4 w-12 h-12 rounded-full bg-green-100 lg:h-14 lg:w-14 dark:bg-green-900">
+                            <span class="text-3xl">🥘</span>
                         </div>
-                        <h3 class="mb-2 text-xl font-bold dark:text-white">Menu Bergizi Seimbang</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Menu harian yang dirancang oleh ahli gizi profesional dengan protein, karbohidrat, dan vitamin seimbang untuk kesehatan optimal.</p>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Makan Bergizi Gratis</h3>
+                        <p class="text-gray-700 dark:text-gray-400">Program penyediaan makanan bergizi berkualitas tinggi dengan menu yang dirancang ahli gizi profesional untuk kesehatan optimal karyawan dan keluarga.</p>
                     </div>
-                    <div>
-                        <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
-                            <span class="text-2xl">🏢</span>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg hover:shadow-xl transition border-l-4 border-green-500">
+                        <div class="flex justify-center items-center mb-4 w-12 h-12 rounded-full bg-green-100 lg:h-14 lg:w-14 dark:bg-green-900">
+                            <span class="text-3xl">🍴</span>
                         </div>
-                        <h3 class="mb-2 text-xl font-bold dark:text-white">Catering Korporat</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Layanan catering untuk perusahaan, kantor, dan acara dengan sistem delivery tepat waktu dan penuh tanggung jawab.</p>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Peralatan Makan Profesional</h3>
+                        <p class="text-gray-700 dark:text-gray-400">Pengadaan peralatan makan berkualitas tinggi dan tahan lama dengan standar industri internasional untuk kebutuhan operasional Anda.</p>
                     </div>
-                    <div>
-                        <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
-                            <span class="text-2xl">👨‍🍳</span>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg hover:shadow-xl transition border-l-4 border-green-500">
+                        <div class="flex justify-center items-center mb-4 w-12 h-12 rounded-full bg-green-100 lg:h-14 lg:w-14 dark:bg-green-900">
+                            <span class="text-3xl">📋</span>
                         </div>
-                        <h3 class="mb-2 text-xl font-bold dark:text-white">Chef Berpengalaman</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Tim chef profesional dengan pengalaman bertahun-tahun dalam mengolah masakan berkualitas dan bergizi tinggi.</p>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Konsultasi Pengadaan</h3>
+                        <p class="text-gray-700 dark:text-gray-400">Layanan konsultasi lengkap mengenai prosedur pengadaan yang efisien, transparan, dan akuntabel sesuai standar perusahaan Anda.</p>
                     </div>
-                    <div>
-                        <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
-                            <span class="text-2xl">🍕</span>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg hover:shadow-xl transition border-l-4 border-green-500">
+                        <div class="flex justify-center items-center mb-4 w-12 h-12 rounded-full bg-green-100 lg:h-14 lg:w-14 dark:bg-green-900">
+                            <span class="text-3xl">✅</span>
                         </div>
-                        <h3 class="mb-2 text-xl font-bold dark:text-white">Beragam Pilihan Menu</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Tersedia berbagai pilihan menu tradisional dan modern disesuaikan dengan preferensi dan kebutuhan diet pelanggan.</p>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Standar Kualitas Ketat</h3>
+                        <p class="text-gray-700 dark:text-gray-400">Setiap barang dan jasa melewati verifikasi ketat dengan standar HACCP, SOP profesional, dan sertifikasi internasional.</p>
                     </div>
-                    <div>
-                        <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
-                            <span class="text-2xl">🌡️</span>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg hover:shadow-xl transition border-l-4 border-green-500">
+                        <div class="flex justify-center items-center mb-4 w-12 h-12 rounded-full bg-green-100 lg:h-14 lg:w-14 dark:bg-green-900">
+                            <span class="text-3xl">🔄</span>
                         </div>
-                        <h3 class="mb-2 text-xl font-bold dark:text-white">Standar Kebersihan Tinggi</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Proses produksi dengan standar HACCP dan SOP ketat untuk menjamin kebersihan dan keamanan pangan terbaik.</p>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Proses Transparan & Kompetitif</h3>
+                        <p class="text-gray-700 dark:text-gray-400">Pengadaan terbuka yang memberikan kesempatan adil kepada semua penyedia dengan dokumentasi lengkap dan pertanggungjawaban jelas.</p>
                     </div>
-                    <div>
-                        <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-green-100 lg:h-12 lg:w-12 dark:bg-green-900">
-                            <span class="text-2xl">📦</span>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg hover:shadow-xl transition border-l-4 border-green-500">
+                        <div class="flex justify-center items-center mb-4 w-12 h-12 rounded-full bg-green-100 lg:h-14 lg:w-14 dark:bg-green-900">
+                            <span class="text-3xl">🚚</span>
                         </div>
-                        <h3 class="mb-2 text-xl font-bold dark:text-white">Kemasan Ramah Lingkungan</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Menggunakan kemasan yang aman, higienis, dan dapat didaur ulang untuk menjaga lingkungan.</p>
+                        <h3 class="mb-3 text-xl font-bold text-gray-900 dark:text-white">Delivery On-Time Terpercaya</h3>
+                        <p class="text-gray-700 dark:text-gray-400">Sistem pengiriman profesional dengan jaminan tepat waktu dan penanganan barang yang aman hingga sampai di lokasi Anda.</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- CTA Section -->
-        <section class="bg-white dark:bg-gray-900">
-            <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
-                <div class="mx-auto max-w-screen-sm text-center">
-                    <h2 class="mb-4 text-4xl tracking-tight font-extrabold leading-tight text-gray-900 dark:text-white">
-                        Pesan Catering Berkualitas Sekarang
+        <section class="bg-gradient-to-r from-green-600 to-emerald-700 dark:from-green-900 dark:to-emerald-900 py-12 sm:py-20">
+            <div class="px-4 mx-auto max-w-screen-xl">
+                <div class="mx-auto max-w-3xl text-center">
+                    <h2 class="mb-4 text-3xl md:text-4xl tracking-tight font-extrabold leading-tight text-white">
+                        ✨ Siap Memenuhi Kebutuhan Pengadaan Anda
                     </h2>
-                    <p class="mb-6 font-light text-gray-600 dark:text-gray-400 md:text-lg">
-                        Dapatkan menu bergizi langsung ke lokasi Anda. Hubungi kami untuk penawaran khusus dan konsultasi menu gratis.
+                    <p class="mb-8 font-light text-green-50 md:text-lg leading-relaxed">
+                        Hubungi kami sekarang untuk konsultasi gratis, penawaran khusus, dan solusi pengadaan yang tepat khusus untuk kebutuhan makan bergizi dan peralatan makan perusahaan Anda. Tim profesional kami siap membantu Anda selama <span class="font-bold">24 jam, 7 hari</span>.
                     </p>
-                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <div class="grid md:grid-cols-2 gap-4 mb-8 max-w-2xl mx-auto">
+                        <div class="bg-white/20 backdrop-blur-md rounded-lg p-5 border border-white/30 hover:bg-white/30 transition">
+                            <p class="text-white text-sm mb-2 font-semibold">👤 AEN / ICA</p>
+                            <a href="tel:087787620888" class="text-white font-bold text-lg hover:text-green-100 transition">
+                                📞 087787620888
+                            </a>
+                        </div>
+                        <div class="bg-white/20 backdrop-blur-md rounded-lg p-5 border border-white/30 hover:bg-white/30 transition">
+                            <p class="text-white text-sm mb-2 font-semibold">👤 BAGUS</p>
+                            <a href="tel:087878381090" class="text-white font-bold text-lg hover:text-green-100 transition">
+                                📞 087878381090
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
                         <router-link
                             to="/app/auth"
-                            class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 focus:outline-none dark:focus:ring-green-800"
+                            class="text-green-700 bg-white hover:bg-green-50 focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm md:text-base px-6 md:px-8 py-3 md:py-4 dark:bg-green-50 dark:text-green-800 dark:hover:bg-green-100 focus:outline-none shadow-lg transform hover:scale-105 transition"
                         >
-                            Pesan Sekarang
+                            📋 Akses Portal Pengadaan
                         </router-link>
                         <a
-                            href="tel:+62-xxx-xxxx-xxxx"
-                            class="text-green-700 border border-green-700 hover:bg-green-50 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:border-green-600 dark:text-green-400 dark:hover:bg-gray-700 focus:outline-none dark:focus:ring-green-800"
+                            href="tel:087878381090"
+                            class="text-white bg-green-800 hover:bg-green-900 focus:ring-4 focus:ring-green-200 font-bold rounded-lg text-sm md:text-base px-6 md:px-8 py-3 md:py-4 dark:bg-green-700 dark:hover:bg-green-800 focus:outline-none shadow-lg transform hover:scale-105 transition"
                         >
-                            📞 Hubungi Kami
+                            ☎️ Hubungi Sekarang
                         </a>
                     </div>
+                </div>
+                <div class="mt-12 pt-8 border-t border-white/30 text-center text-green-50 text-sm">
+                    <p class="mb-2 font-semibold">📍 Lokasi: Jl. Garuda Raya No.C114, Jurang Manggu Tim., Kec. Pd. Aren, Kota Tangerang Selatan, Banten 15222</p>
+                    <p>⏰ Buka 24 Jam | 🌍 Tangerang Selatan, Banten</p>
                 </div>
             </div>
         </section>
