@@ -189,7 +189,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import axios from "axios";
+import axios from '../../../api/dashboardAxios';
 const route = useRoute();
 const router = useRouter();
 const id = route.params.id;
@@ -238,13 +238,13 @@ const save = async () => {
         total: total.value,
     };
     id
-        ? await axios.put(`/api/invoices/${id}`, data)
-        : await axios.post("/api/invoices", data);
-    router.push("/invoices");
+        ? await axios.put(`invoices/${id}`, data)
+        : await axios.post("invoices", data);
+    router.push("app/invoices/invoices");
 };
 onMounted(async () => {
     if (id) {
-        const { data } = await axios.get(`/api/invoices/${id}`);
+        const data = await axios.get(`invoices/${id}`);
         f.value = data;
     }
 });
