@@ -79,9 +79,9 @@
 		</div>
 
 		<div class="flex gap-2">
-			<button @click="downloadPdf(inv.id)" class="bg-red-600 text-white px-4 py-2 rounded">📄 PDF</button>
-			<button @click="$router.push(`/app/invoices/invoices/${inv.id}/edit`)" class="bg-blue-600 text-white px-4 py-2 rounded">Edit</button>
-			<button @click="$router.push('/app/invoices/invoices')" class="border px-4 py-2 rounded">Back</button>
+			<button @click="downloadPdf(inv.id)" :disabled="loadingPdf" :class="[loadingPdf ? 'bg-gray-400 cursor-wait opacity-75' : 'bg-red-600 hover:bg-red-700', 'text-white px-4 py-2 rounded']">{{ loadingPdf ? '⏳ Generating...' : '📄 PDF' }}</button>
+			<button @click="$router.push(`/app/invoices/invoices/${inv.id}/edit`)" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Edit</button>
+			<button @click="$router.push('/app/invoices/invoices')" class="border px-4 py-2 rounded hover:bg-gray-50">Back</button>
 		</div>
 	</div>
 </template>
@@ -92,6 +92,7 @@ import { useRoute } from 'vue-router';
 import axios from '../../../api/dashboardAxios';
 const route = useRoute();
 const inv = ref(null);
+const loadingPdf = ref(false);
 const fmt = n => new Intl.NumberFormat('id').format(n);
 
 onMounted(async () => {
@@ -101,6 +102,7 @@ onMounted(async () => {
 
 const downloadPdf = async (id) => {
 	try {
+		loadingPdf.value = true;
 		const blob = await axios.get(`invoices/${id}/pdf`, { responseType: 'blob', headers: { Accept: 'application/pdf' } });
 		const url = window.URL.createObjectURL(blob);
 		const a = document.createElement('a');
@@ -114,6 +116,8 @@ const downloadPdf = async (id) => {
 	} catch (e) {
 		console.error('PDF download failed', e);
 		alert('Failed to generate PDF.');
+	} finally {
+		loadingPdf.value = false;
 	}
 };
 

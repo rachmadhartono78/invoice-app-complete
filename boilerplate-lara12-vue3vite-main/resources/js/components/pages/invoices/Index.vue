@@ -82,10 +82,11 @@
                                 </button>
                                 <button
                                     @click.prevent="downloadPdf(inv.id)"
-                                    class="text-red-600"
+                                    :disabled="loadingPdfId === inv.id"
+                                    :class="loadingPdfId === inv.id ? 'text-gray-400 opacity-50 cursor-wait' : 'text-red-600 hover:text-red-700'"
                                     title="Export PDF"
                                 >
-                                    📄
+                                    {{ loadingPdfId === inv.id ? '⏳' : '📄' }}
                                 </button>
                                 <button
                                     @click="del(inv.id)"
@@ -126,6 +127,7 @@ const search = ref("");
 const status = ref("");
 const page = ref(1);
 const pages = ref(1);
+const loadingPdfId = ref(null);
 const load = async (p = page.value) => {
     const data = await axios.get("invoices", {
         params: { page: p, search: search.value, status: status.value },
@@ -148,6 +150,7 @@ onMounted(load);
 
 const downloadPdf = async (id) => {
     try {
+        loadingPdfId.value = id;
         const blob = await axios.get(`invoices/${id}/pdf`, {
             responseType: 'blob',
             headers: { Accept: 'application/pdf' },
@@ -165,6 +168,8 @@ const downloadPdf = async (id) => {
     } catch (e) {
         console.error('PDF download failed', e);
         alert('Failed to generate PDF.');
+    } finally {
+        loadingPdfId.value = null;
     }
 };
 </script>
