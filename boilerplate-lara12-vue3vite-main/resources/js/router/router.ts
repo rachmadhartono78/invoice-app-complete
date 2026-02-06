@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import settingRoutes from './settings';
+import invoicesRoutes from './invoices';
+
 
 import {
     initFlowbite,
@@ -83,26 +85,7 @@ const routes: RouteRecordRaw[] = [
                         component: () => import("@/components/main/Home.vue"),
                     },
 
-                    {
-                    path: "invoices",
-                    name: "invoices-index",
-                    component: () => import("@/components/pages/invoices/Index.vue"),
-                    },
-                    {
-                    path: "invoices/create",
-                    name: "invoices-create",
-                    component: () => import("@/components/pages/invoices/Form.vue"),
-                    },
-                    {
-                    path: "invoices/:id",
-                    name: "invoices-view",
-                    component: () => import("@/components/pages/invoices/View.vue"),
-                    },
-                    {
-                    path: "invoices/:id/edit",
-                    name: "invoices-edit",
-                    component: () => import("@/components/pages/invoices/Form.vue"),
-                    },
+                  
 
 
 
@@ -119,6 +102,7 @@ const routes: RouteRecordRaw[] = [
 
                     // Settings routes (RBAC configuration)
                     ...settingRoutes,
+                    ...invoicesRoutes,
                 ],
             },
             {
