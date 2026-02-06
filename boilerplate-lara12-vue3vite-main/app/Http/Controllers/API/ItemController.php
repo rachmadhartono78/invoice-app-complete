@@ -62,11 +62,15 @@ class ItemController {
             'code' => 'nullable|string|unique:items',
             'unit' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
+            'quantity' => 'nullable|integer|min:0',
             'area' => 'nullable|string',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|boolean',
         ]);
+
+        // Set defaults
+        $validated['quantity'] = $validated['quantity'] ?? 1;
+        $validated['is_active'] = $validated['is_active'] ?? true;
 
         $item = Item::create($validated);
 
@@ -87,10 +91,10 @@ class ItemController {
             'code' => 'nullable|string|unique:items,code,' . $item->id,
             'unit' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
+            'quantity' => 'nullable|integer|min:0',
             'area' => 'nullable|string',
             'description' => 'nullable|string',
-            'is_active' => 'boolean',
+            'is_active' => 'nullable|boolean',
         ]);
 
         $item->update($validated);

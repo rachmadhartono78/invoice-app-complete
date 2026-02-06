@@ -347,80 +347,90 @@ function terbilangIndo(n) {
     
     // Round to nearest rupiah (no cents in Indonesian currency)
     n = Math.round(n);
+    if (n < 0) n = Math.abs(n); // Handle negative
     
-    const ones = ["","satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan"];
-    const teens = ["sepuluh","sebelas","dua belas","tiga belas","empat belas","lima belas","enam belas","tujuh belas","delapan belas","sembilan belas"];
-    const tens = ["","","dua puluh","tiga puluh","empat puluh","lima puluh","enam puluh","tujuh puluh","delapan puluh","sembilan puluh"];
+    const ones = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan'];
+    const teens = ['sepuluh', 'sebelas', 'dua belas', 'tiga belas', 'empat belas', 'lima belas', 'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas'];
+    const tens = ['', '', 'dua puluh', 'tiga puluh', 'empat puluh', 'lima puluh', 'enam puluh', 'tujuh puluh', 'delapan puluh', 'sembilan puluh'];
     
     function convertBelowThousand(num) {
-        let result = "";
+        if (num === 0) return '';
         
+        let result = '';
+        
+        // Hundreds
         const hundreds = Math.floor(num / 100);
-        if (hundreds > 0) {
-            if (hundreds === 1) {
-                result = "seratus";
-            } else {
-                result = ones[hundreds] + " ratus";
-            }
+        if (hundreds === 1) {
+            result = 'seratus';
+        } else if (hundreds > 1) {
+            result = ones[hundreds] + ' ratus';
         }
         
+        // Tens and Ones
         const remainder = num % 100;
-        if (remainder > 0) {
-            if (result) result += " ";
+        if (remainder === 0) {
+            return result;
+        }
+        
+        if (result) result += ' ';
+        
+        if (remainder < 10) {
+            // Only single digit (1-9)
+            result += ones[remainder];
+        } else if (remainder < 20) {
+            // Teen numbers (10-19)
+            result += teens[remainder - 10];
+        } else {
+            // 20 and above
+            const tenDigit = Math.floor(remainder / 10);
+            const oneDigit = remainder % 10;
             
-            if (remainder < 10) {
-                result += ones[remainder];
-            } else if (remainder < 20) {
-                result += teens[remainder - 10];
-            } else {
-                const t = Math.floor(remainder / 10);
-                const o = remainder % 10;
-                result += tens[t];
-                if (o > 0) {
-                    result += " " + ones[o];
-                }
+            result += tens[tenDigit];
+            
+            if (oneDigit > 0) {
+                result += ' ' + ones[oneDigit];
             }
         }
         
         return result;
     }
     
-    if (n === 0) return "nol rupiah";
+    if (n === 0) return 'nol rupiah';
     
-    let result = "";
+    let parts = [];
     
     // Milyar (billions)
     const milyar = Math.floor(n / 1000000000);
     if (milyar > 0) {
-        result = convertBelowThousand(milyar) + " milyar";
+        const milyarText = convertBelowThousand(milyar);
+        parts.push(milyarText + ' milyar');
     }
     
     // Juta (millions)
     const juta = Math.floor((n % 1000000000) / 1000000);
     if (juta > 0) {
-        if (result) result += " ";
-        result += convertBelowThousand(juta) + " juta";
+        const jutaText = convertBelowThousand(juta);
+        parts.push(jutaText + ' juta');
     }
     
     // Ribu (thousands)
     const ribu = Math.floor((n % 1000000) / 1000);
     if (ribu > 0) {
-        if (result) result += " ";
+        const ribuText = convertBelowThousand(ribu);
         if (ribu === 1) {
-            result += "seribu";
+            parts.push('seribu');
         } else {
-            result += convertBelowThousand(ribu) + " ribu";
+            parts.push(ribuText + ' ribu');
         }
     }
     
-    // Satuan (ones)
+    // Satuan (ones/hundreds/tens below 1000)
     const satuan = n % 1000;
     if (satuan > 0) {
-        if (result) result += " ";
-        result += convertBelowThousand(satuan);
+        parts.push(convertBelowThousand(satuan));
     }
     
-    return result.trim() + " rupiah";
+    return parts.join(' ') + ' rupiah';
 }
 const save = async () => {
     // Reset errors
