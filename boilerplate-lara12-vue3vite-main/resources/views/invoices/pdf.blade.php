@@ -384,23 +384,20 @@
 function terbilang($n) {
     $angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
     
-    function inWords($n) {
-        global $angka;
-        $n = abs($n);
-        if ($n < 12) return $angka[$n];
-        if ($n < 20) return inWords($n - 10) . " Belas";
-        if ($n < 100) return inWords($n / 10) . " Puluh " . inWords($n % 10);
-        if ($n < 200) return "Seratus " . inWords($n - 100);
-        if ($n < 1000) return inWords($n / 100) . " Ratus " . inWords($n % 100);
-        if ($n < 2000) return "Seribu " . inWords($n - 1000);
-        if ($n < 1000000) return inWords($n / 1000) . " Ribu " . inWords($n % 1000);
-        if ($n < 1000000000) return inWords($n / 1000000) . " Juta " . inWords($n % 1000000);
-        return inWords($n / 1000000000) . " Milyar " . inWords($n % 1000000000);
-    }
-    
     if (!$n && $n !== 0) return '';
-    if ($n === 0) return 'Nol';
+    if ($n == 0) return 'Nol';
+    if ($n < 0) $n = abs($n);
     
-    return inWords($n);
+    $n = (int)$n;
+    
+    if ($n < 12) return $angka[$n];
+    if ($n < 20) return terbilang($n - 10) . " Belas";
+    if ($n < 100) return terbilang((int)($n / 10)) . " Puluh" . ($n % 10 ? " " . terbilang($n % 10) : "");
+    if ($n < 200) return "Seratus" . ($n - 100 ? " " . terbilang($n - 100) : "");
+    if ($n < 1000) return terbilang((int)($n / 100)) . " Ratus" . ($n % 100 ? " " . terbilang($n % 100) : "");
+    if ($n < 2000) return "Seribu" . ($n - 1000 ? " " . terbilang($n - 1000) : "");
+    if ($n < 1000000) return terbilang((int)($n / 1000)) . " Ribu" . ($n % 1000 ? " " . terbilang($n % 1000) : "");
+    if ($n < 1000000000) return terbilang((int)($n / 1000000)) . " Juta" . ($n % 1000000 ? " " . terbilang($n % 1000000) : "");
+    return terbilang((int)($n / 1000000000)) . " Milyar" . ($n % 1000000000 ? " " . terbilang($n % 1000000000) : "");
 }
 @endphp
