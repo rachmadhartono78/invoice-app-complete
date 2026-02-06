@@ -67,14 +67,14 @@
                         <td class="p-3">
                             <div class="flex gap-2 justify-center">
                                 <button
-                                    @click="$router.push(`/invoices/${inv.id}`)"
+                                    @click="$router.push(`/app/invoices/invoices/${inv.id}`)"
                                     class="text-blue-600"
                                 >
                                     👁
                                 </button>
                                 <button
                                     @click="
-                                        $router.push(`//app/invoices/${inv.id}/edit`)
+                                        $router.push(`/app/invoices/invoices/${inv.id}/edit`)
                                     "
                                     class="text-green-600"
                                 >

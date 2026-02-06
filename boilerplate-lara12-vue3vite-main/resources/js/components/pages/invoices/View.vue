@@ -80,8 +80,8 @@
 
 		<div class="flex gap-2">
 			<button @click="downloadPdf(inv.id)" class="bg-red-600 text-white px-4 py-2 rounded">📄 PDF</button>
-			<button @click="$router.push(`/invoices/${inv.id}/edit`)" class="bg-blue-600 text-white px-4 py-2 rounded">Edit</button>
-			<button @click="$router.push('/invoices')" class="border px-4 py-2 rounded">Back</button>
+			<button @click="$router.push(`/app/invoices/invoices/${inv.id}/edit`)" class="bg-blue-600 text-white px-4 py-2 rounded">Edit</button>
+			<button @click="$router.push('/app/invoices/invoices')" class="border px-4 py-2 rounded">Back</button>
 		</div>
 	</div>
 </template>

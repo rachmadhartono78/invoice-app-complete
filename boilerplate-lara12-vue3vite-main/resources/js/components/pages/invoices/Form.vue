@@ -204,7 +204,7 @@
             <div class="flex gap-4 justify-end">
                 <button
                     type="button"
-                    @click="$router.push('/invoices')"
+                    @click="$router.push('/app/invoices/invoices')"
                     class="px-4 py-2 border rounded"
                 >
                     Cancel
@@ -300,7 +300,7 @@ const save = async () => {
     id
         ? await axios.put(`invoices/${id}`, data)
         : await axios.post("invoices", data);
-    router.push("app/invoices/invoices");
+    router.push("/app/invoices/invoices");
 };
 onMounted(async () => {
     if (id) {
