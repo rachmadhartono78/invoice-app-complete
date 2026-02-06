@@ -105,7 +105,7 @@ Route::middleware(['auth:sanctum', LogApiRequests::class])->group(function () {
     });
 
     
-        Route::middleware('auth:sanctum')->prefix('invoices')->group(function(){
+        Route::prefix('invoices')->group(function(){
             Route::get('/',[InvoiceController::class,'index']);
             Route::post('/',[InvoiceController::class,'store']);
             Route::get('/{invoice}',[InvoiceController::class,'show']);
