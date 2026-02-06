@@ -13,6 +13,7 @@ use App\Http\Controllers\API\Settings\OrganizationController;
 use App\Http\Middleware\LogApiRequests;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\InvoiceController;
+use App\Http\Controllers\API\ItemController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,5 +114,14 @@ Route::middleware(['auth:sanctum', LogApiRequests::class])->group(function () {
             Route::put('/{invoice}',[InvoiceController::class,'update']);
             Route::delete('/{invoice}',[InvoiceController::class,'destroy']);
             Route::get('/{invoice}/pdf',[InvoiceController::class,'pdf']);
-    });
+        });
+
+        Route::prefix('items')->group(function(){
+            Route::get('/',[ItemController::class,'index']);
+            Route::get('/categories',[ItemController::class,'categories']);
+            Route::post('/',[ItemController::class,'store']);
+            Route::get('/{item}',[ItemController::class,'show']);
+            Route::put('/{item}',[ItemController::class,'update']);
+            Route::delete('/{item}',[ItemController::class,'destroy']);
+        });
 });

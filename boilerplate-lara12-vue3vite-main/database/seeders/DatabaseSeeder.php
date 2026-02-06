@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             OrganizationSeeder::class,
             AuthoritySeeder::class,
             UserSeeder::class,
+            ItemSeeder::class,
             InvoiceSeeder::class,
         ]);
     }

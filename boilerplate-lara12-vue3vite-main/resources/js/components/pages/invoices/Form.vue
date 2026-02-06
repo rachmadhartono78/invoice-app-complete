@@ -81,21 +81,36 @@
                 <div
                     v-for="(it, i) in f.items"
                     :key="i"
-                    class="grid grid-cols-6 gap-2 mb-2 items-end"
+                    class="grid grid-cols-7 gap-2 mb-2 items-end"
                 >
                     <div>
-                        <label class="block text-xs">Code*</label
+                        <label class="block text-xs">Select Item*</label>
+                        <select
+                            @change="selectItem(i, $event)"
+                            class="border px-2 py-1 rounded w-full text-sm"
+                        >
+                            <option value="">-- Choose Item --</option>
+                            <option
+                                v-for="item in masterItems"
+                                :key="item.id"
+                                :value="item.id"
+                                :selected="it.item_id === item.id"
+                            >
+                                {{ item.name }} ({{ item.unit }})
+                            </option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs">Code</label
                         ><input
                             v-model="it.item_code"
-                            required
                             class="border px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-xs">Name*</label
+                        <label class="block text-xs">Name</label
                         ><input
                             v-model="it.item_name"
-                            required
                             class="border px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
@@ -148,6 +163,7 @@
                     type="button"
                     @click="
                         f.items.push({
+                            item_id: null,
                             item_code: '',
                             item_name: '',
                             quantity: 1,
@@ -233,6 +249,8 @@ const route = useRoute();
 const router = useRouter();
 const id = route.params.id;
 const nextInvoiceNumber = ref(null);
+const masterItems = ref([]); // Master items list for dropdown
+
 const f = ref({
     invoice_number: '',
     invoice_date: new Date().toISOString().split("T")[0],
@@ -251,6 +269,7 @@ const f = ref({
     other_charges: 0,
     items: [
         {
+            item_id: null,
             item_code: "",
             item_name: "",
             quantity: 1,
@@ -309,7 +328,33 @@ const save = async () => {
         : await axios.post("invoices", { ...data, invoice_number: f.value.invoice_number || null });
     router.push("/app/invoices/invoices");
 };
+
+const selectItem = (index, event) => {
+    const itemId = event.target.value;
+    if (!itemId) return;
+
+    const selectedMasterItem = masterItems.value.find(item => item.id == itemId);
+    if (selectedMasterItem) {
+        f.value.items[index].item_id = selectedMasterItem.id;
+        f.value.items[index].item_code = selectedMasterItem.code || '';
+        f.value.items[index].item_name = selectedMasterItem.name;
+        f.value.items[index].unit_price = selectedMasterItem.price || 0;
+        // Keep quantity as is (user should set this)
+        if (f.value.items[index].quantity === 1) {
+            f.value.items[index].quantity = selectedMasterItem.quantity || 1;
+        }
+    }
+};
+
 onMounted(async () => {
+    // Load master items
+    try {
+        const response = await axios.get('items?per_page=100');
+        masterItems.value = response.data;
+    } catch (e) {
+        console.warn('Could not load master items:', e);
+    }
+
     if (id) {
         const data = await axios.get(`invoices/${id}`);
         f.value = data;
