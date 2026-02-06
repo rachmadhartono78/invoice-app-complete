@@ -7,7 +7,15 @@
             @submit.prevent="save"
             class="bg-white p-6 rounded shadow space-y-6"
         >
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="block mb-1">Invoice #</label>
+                    <input
+                        v-model="f.invoice_number"
+                        placeholder="(auto)"
+                        class="border px-3 py-2 rounded w-full"
+                    />
+                </div>
                 <div>
                     <label class="block mb-1">Invoice Date*</label>
                     <input
@@ -18,39 +26,46 @@
                     />
                 </div>
                 <div>
-                    <label class="block mb-1">Customer*</label
-                    ><input
+                    <label class="block mb-1">Currency</label>
+                    <input
+                        v-model="f.currency_name"
+                        class="border px-3 py-2 rounded w-full"
+                    />
+                </div>
+                <div class="col-span-2">
+                    <label class="block mb-1">Customer*</label>
+                    <input
                         v-model="f.customer_name"
                         required
                         class="border px-3 py-2 rounded w-full"
                     />
                 </div>
                 <div>
-                    <label class="block mb-1">Address</label
-                    ><input
+                    <label class="block mb-1">PO Number</label>
+                    <input
+                        v-model="f.po_number"
+                        class="border px-3 py-2 rounded w-full"
+                    />
+                </div>
+                <div>
+                    <label class="block mb-1">Address</label>
+                    <input
                         v-model="f.customer_address"
                         class="border px-3 py-2 rounded w-full"
                     />
                 </div>
                 <div>
-                    <label class="block mb-1">Payment Terms</label
-                    ><input
+                    <label class="block mb-1">Payment Terms</label>
+                    <input
                         v-model="f.payment_terms"
                         placeholder="eg: COD"
                         class="border px-3 py-2 rounded w-full"
                     />
                 </div>
                 <div>
-                    <label class="block mb-1">Expedition</label
-                    ><input
+                    <label class="block mb-1">Expedition</label>
+                    <input
                         v-model="f.expedition"
-                        class="border px-3 py-2 rounded w-full"
-                    />
-                </div>
-                <div>
-                    <label class="block mb-1">PO Number</label
-                    ><input
-                        v-model="f.po_number"
                         class="border px-3 py-2 rounded w-full"
                     />
                 </div>
@@ -165,6 +180,24 @@
                     />
                 </div>
             </div>
+            <div>
+                <label class="block mb-1">Terbilang (amount in words)</label>
+                <input v-model="f.terbilang" :placeholder="terbilangPlaceholder" class="border px-3 py-2 rounded w-full" />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block mb-1">Prepared By</label>
+                    <input v-model="f.prepared_by" class="border px-3 py-2 rounded w-full" />
+                </div>
+                <div>
+                    <label class="block mb-1">Approved By</label>
+                    <input v-model="f.approved_by" class="border px-3 py-2 rounded w-full" />
+                </div>
+            </div>
+            <div>
+                <label class="block mb-1">Notes / Keterangan</label>
+                <textarea v-model="f.keterangan" class="border px-3 py-2 rounded w-full" rows="4"></textarea>
+            </div>
             <div class="text-right text-xl font-bold">
                 Total: {{ fmt(total) }}
             </div>
@@ -194,7 +227,13 @@ const route = useRoute();
 const router = useRouter();
 const id = route.params.id;
 const f = ref({
+    invoice_number: '',
     invoice_date: new Date().toISOString().split("T")[0],
+    currency_name: 'Indonesian Rupiah',
+    terbilang: '',
+    keterangan: '',
+    prepared_by: '',
+    approved_by: '',
     customer_name: "",
     customer_address: "",
     payment_terms: "",
@@ -224,6 +263,27 @@ const total = computed(() => {
     return afterDis + ppn + (f.value.other_charges || 0);
 });
 const fmt = (n) => new Intl.NumberFormat("id").format(n);
+
+const terbilangPlaceholder = computed(() => terbilangIndo(Math.round(total.value)));
+
+function terbilangIndo(n) {
+    if (!n && n !== 0) return '';
+    const angka = ["","satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan","sepuluh","sebelas"];
+    function inWords(n) {
+        n = Math.floor(n);
+        if (n < 12) return angka[n];
+        if (n < 20) return inWords(n - 10) + ' belas';
+        if (n < 100) return inWords(Math.floor(n / 10)) + ' puluh' + (n % 10 ? ' ' + inWords(n % 10) : '');
+        if (n < 200) return 'seratus' + (n - 100 ? ' ' + inWords(n - 100) : '');
+        if (n < 1000) return inWords(Math.floor(n / 100)) + ' ratus' + (n % 100 ? ' ' + inWords(n % 100) : '');
+        if (n < 2000) return 'seribu' + (n - 1000 ? ' ' + inWords(n - 1000) : '');
+        if (n < 1000000) return inWords(Math.floor(n / 1000)) + ' ribu' + (n % 1000 ? ' ' + inWords(n % 1000) : '');
+        if (n < 1000000000) return inWords(Math.floor(n / 1000000)) + ' juta' + (n % 1000000 ? ' ' + inWords(n % 1000000) : '');
+        return inWords(Math.floor(n / 1000000000)) + ' milyar' + (n % 1000000000 ? ' ' + inWords(n % 1000000000) : '');
+    }
+    if (n === 0) return 'nol';
+    return inWords(n) + ' rupiah';
+}
 const save = async () => {
     const data = {
         ...f.value,

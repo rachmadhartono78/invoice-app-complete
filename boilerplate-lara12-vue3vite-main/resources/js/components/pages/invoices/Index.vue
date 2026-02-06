@@ -80,12 +80,13 @@
                                 >
                                     ✏️
                                 </button>
-                                <a
-                                    :href="`/api/invoices/${inv.id}/pdf`"
-                                    target="_blank"
+                                <button
+                                    @click.prevent="downloadPdf(inv.id)"
                                     class="text-red-600"
-                                    >📄</a
+                                    title="Export PDF"
                                 >
+                                    📄
+                                </button>
                                 <button
                                     @click="del(inv.id)"
                                     class="text-red-600"
@@ -144,4 +145,26 @@ const badge = (s) =>
         s
     ] || "";
 onMounted(load);
+
+const downloadPdf = async (id) => {
+    try {
+        const blob = await axios.get(`invoices/${id}/pdf`, {
+            responseType: 'blob',
+            headers: { Accept: 'application/pdf' },
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.download = `invoice-${id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error('PDF download failed', e);
+        alert('Failed to generate PDF.');
+    }
+};
 </script>
