@@ -1,29 +1,406 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><title>Invoice</title>
-<style>*{margin:0;padding:0}body{font-family:Arial;font-size:11px}.header{text-align:center;margin-bottom:20px}.header h1{font-size:18px}.info{margin-bottom:15px}.box{border:2px solid #000;padding:10px;margin-bottom:15px}.box table{width:100%}.box td{padding:3px}table.items{width:100%;border-collapse:collapse;margin-bottom:15px}table.items th,table.items td{border:1px solid #000;padding:6px;text-align:left}table.items th{background:#f0f0f0;text-align:center}.right{text-align:right}.center{text-align:center}.summary{width:50%;margin-left:auto}.summary table{width:100%}.summary td{padding:5px}.total{font-weight:bold;border-top:2px solid #000;padding-top:8px}.sig{margin-top:50px;display:flex;justify-content:space-between}.sig div{text-align:center;width:45%}.sig-line{border-bottom:1px solid #000;height:60px;margin:10px 0}
-</style></head><body>
-<div class="header"><h1>Indonesia</h1><h2>Faktur Penjualan</h2></div>
-<div class="info"><strong>Kepada:</strong><br><strong>{{$invoice->customer_name}}</strong>
-@if($invoice->customer_address)<br>{{$invoice->customer_address}}@endif</div>
-<div class="box"><table><tr><td width="20%">Tanggal</td><td>:</td><td>{{$invoice->invoice_date->format('d M Y')}}</td>
-<td width="20%">Nomor</td><td>:</td><td>{{$invoice->invoice_number}}</td></tr>
-<tr><td>Syarat Pembayaran</td><td>:</td><td>{{$invoice->payment_terms??'-'}}</td>
-<td>{{$invoice->expedition?'Ekspedisi':'PO No'}}</td><td>:</td><td>{{$invoice->expedition??$invoice->po_number??'-'}}</td></tr>
-@if($invoice->delivery_date)<tr><td>Tanggal Pengiriman</td><td>:</td><td>{{$invoice->delivery_date->format('d M Y')}}</td>
-<td>Mata Uang</td><td>:</td><td>{{$invoice->currency}}</td></tr>@endif</table></div>
-<table class="items"><thead><tr><th width="15%">Kode</th><th>Nama Barang</th><th width="10%">Kts.</th>
-<th width="15%">@Harga</th><th width="12%">Diskon</th><th width="18%">Total</th></tr></thead><tbody>
-@foreach($invoice->items as $item)<tr><td>{{$item->item_code}}</td><td>{{$item->item_name}}</td>
-<td class="center">{{number_format($item->quantity)}}</td><td class="right">{{number_format($item->unit_price,0,'.',',')}}</td>
-<td class="right">{{number_format($item->discount,0,'.',',')}}</td><td class="right">{{number_format($item->total,0,'.',',')}}</td></tr>@endforeach
-</tbody></table>
-<div class="box"><strong>Terbilang:</strong> {{ucwords(terbilang($invoice->total))}} Rupiah</div>
-@if($invoice->notes)<div style="margin-bottom:15px"><strong>Keterangan:</strong><p>{{$invoice->notes}}</p></div>@endif
-<div class="summary"><table><tr><td>Sub Total</td><td class="right">{{number_format($invoice->subtotal,0,'.',',')}}</td></tr>
-@if($invoice->discount>0)<tr><td>Diskon</td><td class="right">{{number_format($invoice->discount,0,'.',',')}}</td></tr>@endif
-@if($invoice->ppn_amount>0)<tr><td>PPN ({{$invoice->ppn_percent}}%)</td><td class="right">{{number_format($invoice->ppn_amount,0,'.',',')}}</td></tr>@endif
-@if($invoice->other_charges>0)<tr><td>Biaya Lain-lain</td><td class="right">{{number_format($invoice->other_charges,0,'.',',')}}</td></tr>@endif
-<tr class="total"><td>Total</td><td class="right">{{number_format($invoice->total,0,'.',',')}}</td></tr></table></div>
-<div class="sig"><div><p>Disiapkan Oleh</p><div class="sig-line"></div><p>{{$invoice->prepared_by??'__________'}}</p></div>
-<div><p>Disetujui Oleh</p><div class="sig-line"></div><p>{{$invoice->approved_by??'__________'}}</p></div></div>
-</body></html>
-@php function terbilang($n){$h=["","Satu","Dua","Tiga","Empat","Lima","Enam","Tujuh","Delapan","Sembilan","Sepuluh","Sebelas"];$n=abs($n);if($n<12)return $h[$n];if($n<20)return terbilang($n-10)." Belas";if($n<100)return terbilang($n/10)." Puluh ".terbilang($n%10);if($n<200)return"Seratus ".terbilang($n-100);if($n<1000)return terbilang($n/100)." Ratus ".terbilang($n%100);if($n<2000)return"Seribu ".terbilang($n-1000);if($n<1000000)return terbilang($n/1000)." Ribu ".terbilang($n%1000);if($n<1000000000)return terbilang($n/1000000)." Juta ".terbilang($n%1000000);return"Angka terlalu besar";}@endphp
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Invoice - {{ $invoice->invoice_number }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+        /* Header Section */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        .header-left {
+            flex: 1;
+        }
+        .header-left strong {
+            font-size: 10px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .header-left .customer-name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .header-left .underline {
+            border-bottom: 1px solid #000;
+            min-height: 20px;
+        }
+        .header-right {
+            flex: 1;
+            text-align: center;
+        }
+        .header-right h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .header-right h2 {
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+        /* Info Box */
+        .info-box {
+            border: 2px solid #000;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .info-box table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .info-box td {
+            padding: 8px 10px;
+            border-right: 1px solid #000;
+            border-bottom: 1px dashed #999;
+            font-size: 11px;
+        }
+        .info-box td:last-child {
+            border-right: none;
+        }
+        .info-box tr:last-child td {
+            border-bottom: none;
+        }
+        .info-box .label {
+            font-weight: bold;
+            width: 25%;
+        }
+        .info-box .value {
+            width: 25%;
+        }
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border: 2px solid #000;
+        }
+        .items-table thead {
+            background-color: #f5f5f5;
+        }
+        .items-table th {
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .items-table td {
+            border: 1px solid #000;
+            padding: 8px 10px;
+            font-size: 11px;
+        }
+        .items-table .kode {
+            width: 12%;
+            text-align: center;
+        }
+        .items-table .nama {
+            width: 35%;
+        }
+        .items-table .qty {
+            width: 8%;
+            text-align: center;
+        }
+        .items-table .harga {
+            width: 15%;
+            text-align: right;
+        }
+        .items-table .diskon {
+            width: 12%;
+            text-align: right;
+        }
+        .items-table .total {
+            width: 18%;
+            text-align: right;
+            font-weight: bold;
+        }
+        /* Sections */
+        .section-box {
+            border: 1px solid #000;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        .terbilang-text {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .notes-content {
+            font-size: 11px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        /* Summary Section */
+        .summary-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .summary-left {
+            flex: 1;
+        }
+        .summary-right {
+            flex: 0 0 220px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid #000;
+        }
+        .summary-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #ccc;
+            font-size: 11px;
+        }
+        .summary-table tr:last-child td {
+            border-bottom: none;
+        }
+        .summary-table .label {
+            font-weight: normal;
+            width: 50%;
+        }
+        .summary-table .value {
+            text-align: right;
+            font-weight: normal;
+        }
+        .summary-table .total-row td {
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        /* Signature Section */
+        .signature-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            gap: 20px;
+        }
+        .sign-box {
+            flex: 1;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+        }
+        .sign-title {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .sign-line {
+            flex: 1;
+            border-bottom: 1px solid #000;
+            margin: 30px 0 5px;
+        }
+        .sign-name {
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        /* Utility Classes */
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .font-bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-container">
+            <div class="header-left">
+                <strong>Kepada :</strong>
+                <div class="underline"></div>
+                <div class="customer-name">{{ $invoice->customer_name }}</div>
+                @if($invoice->customer_address)
+                    <div style="font-size: 10px; margin-top: 5px;">{{ $invoice->customer_address }}</div>
+                @endif
+            </div>
+            <div class="header-right">
+                <h1>Indonesia</h1>
+                <h2>Faktur Penjualan</h2>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <table>
+                <tr>
+                    <td class="label">Tanggal</td>
+                    <td class="value">{{ $invoice->invoice_date->format('d M Y') }}</td>
+                    <td class="label">Nomor</td>
+                    <td class="value">{{ $invoice->invoice_number }}</td>
+                </tr>
+                <tr>
+                    <td class="label">Syarat Pembayaran</td>
+                    <td class="value">{{ $invoice->payment_terms ?? '-' }}</td>
+                    <td class="label">{{ $invoice->expedition ? 'Ekspedisi' : 'PO No' }}</td>
+                    <td class="value">{{ $invoice->expedition ?? $invoice->po_number ?? '-' }}</td>
+                </tr>
+                @if($invoice->delivery_date)
+                <tr>
+                    <td class="label">Tanggal Pengiriman</td>
+                    <td class="value">{{ $invoice->delivery_date->format('d M Y') }}</td>
+                    <td class="label">Mata Uang</td>
+                    <td class="value">{{ $invoice->currency_name ?? $invoice->currency ?? 'Indonesian Rupiah' }}</td>
+                </tr>
+                @elseif($invoice->currency_name)
+                <tr>
+                    <td class="label">Mata Uang</td>
+                    <td class="value">{{ $invoice->currency_name }}</td>
+                    <td class="label"></td>
+                    <td class="value"></td>
+                </tr>
+                @endif
+            </table>
+        </div>
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th class="kode">Kode Barang</th>
+                    <th class="nama">Nama Barang</th>
+                    <th class="qty">Kts.</th>
+                    <th class="harga">@Harga</th>
+                    <th class="diskon">Diskon</th>
+                    <th class="total">Total Harga</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($invoice->items as $item)
+                <tr>
+                    <td class="kode">{{ $item->item_code }}</td>
+                    <td class="nama">{{ $item->item_name }}</td>
+                    <td class="qty">{{ number_format($item->quantity) }}</td>
+                    <td class="harga">{{ number_format($item->unit_price, 0, '.', ',') }}</td>
+                    <td class="diskon">{{ number_format($item->discount, 0, '.', ',') }}</td>
+                    <td class="total">{{ number_format($item->total, 0, '.', ',') }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <!-- Summary Section -->
+        <div class="summary-container">
+            <!-- Left Side: Terbilang & Notes -->
+            <div class="summary-left">
+                <div class="section-box">
+                    <div class="section-title">Terbilang :</div>
+                    <div class="terbilang-text">{{ ucwords(terbilang($invoice->total)) }} Rupiah</div>
+                </div>
+
+                @if($invoice->notes)
+                <div class="section-box">
+                    <div class="section-title">Keterangan :</div>
+                    <div class="notes-content">{{ $invoice->notes }}</div>
+                </div>
+                @endif
+            </div>
+
+            <!-- Right Side: Summary Table -->
+            <div class="summary-right">
+                <table class="summary-table">
+                    <tr>
+                        <td class="label">Sub Total</td>
+                        <td class="value">{{ number_format($invoice->subtotal, 0, '.', ',') }}</td>
+                    </tr>
+                    @if($invoice->discount > 0)
+                    <tr>
+                        <td class="label">Diskon</td>
+                        <td class="value">{{ number_format($invoice->discount, 0, '.', ',') }}</td>
+                    </tr>
+                    @endif
+                    @if($invoice->ppn_amount > 0)
+                    <tr>
+                        <td class="label">PPN ({{ $invoice->ppn_percent ?? 0 }}%)</td>
+                        <td class="value">{{ number_format($invoice->ppn_amount, 0, '.', ',') }}</td>
+                    </tr>
+                    @endif
+                    @if($invoice->other_charges > 0)
+                    <tr>
+                        <td class="label">Biaya Lain-lain</td>
+                        <td class="value">{{ number_format($invoice->other_charges, 0, '.', ',') }}</td>
+                    </tr>
+                    @endif
+                    <tr class="total-row">
+                        <td class="label">Total</td>
+                        <td class="value">{{ number_format($invoice->total, 0, '.', ',') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signature-container">
+            <div class="sign-box">
+                <div class="sign-title">Disiapkan Oleh</div>
+                <div class="sign-line"></div>
+                <div class="sign-name">{{ $invoice->prepared_by ?? '__________' }}</div>
+            </div>
+            <div class="sign-box">
+                <div class="sign-title">Disetujui Oleh</div>
+                <div class="sign-line"></div>
+                <div class="sign-name">{{ $invoice->approved_by ?? '__________' }}</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+@php
+function terbilang($n) {
+    $angka = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+    
+    function inWords($n) {
+        global $angka;
+        $n = abs($n);
+        if ($n < 12) return $angka[$n];
+        if ($n < 20) return inWords($n - 10) . " Belas";
+        if ($n < 100) return inWords($n / 10) . " Puluh " . inWords($n % 10);
+        if ($n < 200) return "Seratus " . inWords($n - 100);
+        if ($n < 1000) return inWords($n / 100) . " Ratus " . inWords($n % 100);
+        if ($n < 2000) return "Seribu " . inWords($n - 1000);
+        if ($n < 1000000) return inWords($n / 1000) . " Ribu " . inWords($n % 1000);
+        if ($n < 1000000000) return inWords($n / 1000000) . " Juta " . inWords($n % 1000000);
+        return inWords($n / 1000000000) . " Milyar " . inWords($n % 1000000000);
+    }
+    
+    if (!$n && $n !== 0) return '';
+    if ($n === 0) return 'Nol';
+    
+    return inWords($n);
+}
+@endphp
