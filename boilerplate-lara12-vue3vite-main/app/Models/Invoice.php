@@ -19,9 +19,36 @@ class Invoice extends Model {
     
     public static function generateNumber() {
         $date = now();
-        $last = self::whereYear('invoice_date', $date->year)->whereMonth('invoice_date', $date->month)->max('invoice_number');
-        $num = $last ? intval(substr($last, -5)) + 1 : 1;
-        return 'SI.' . $date->format('Y.m.') . str_pad($num, 5, '0', STR_PAD_LEFT);
+        $year = $date->year;
+        $month = $date->month;
+        $prefix = 'SI.' . $date->format('Y.m.');
+        
+        // Get the highest number for this month (including soft-deleted)
+        $last = self::withTrashed()
+            ->whereYear('invoice_date', $year)
+            ->whereMonth('invoice_date', $month)
+            ->orderByRaw("CAST(SUBSTRING(invoice_number, -5) AS UNSIGNED) DESC")
+            ->first();
+        
+        if ($last) {
+            $lastNum = intval(substr($last->invoice_number, -5));
+            $num = $lastNum + 1;
+        } else {
+            $num = 1;
+        }
+        
+        // Safety check: ensure number doesn't exist (handles race conditions)
+        $maxAttempts = 10;
+        while ($maxAttempts-- > 0) {
+            $candidate = $prefix . str_pad($num, 5, '0', STR_PAD_LEFT);
+            if (!self::withTrashed()->where('invoice_number', $candidate)->exists()) {
+                return $candidate;
+            }
+            $num++;
+        }
+        
+        // Fallback: if somehow we can't find a unique number
+        throw new \Exception("Unable to generate unique invoice number");
     }
     
     public function calculate() {

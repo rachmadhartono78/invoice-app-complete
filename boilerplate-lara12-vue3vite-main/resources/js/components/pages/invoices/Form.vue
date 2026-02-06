@@ -12,9 +12,15 @@
                     <label class="block mb-1">Invoice #</label>
                     <input
                         v-model="f.invoice_number"
-                        placeholder="(auto)"
+                        :readonly="!id"
+                        :disabled="!id"
+                        :placeholder="!id ? 'Auto-generated' : ''"
+                        :class="!id ? 'bg-gray-100 cursor-not-allowed' : ''"
                         class="border px-3 py-2 rounded w-full"
                     />
+                    <div v-if="!id && nextInvoiceNumber" class="text-xs text-gray-500 mt-1">
+                        Next: {{ nextInvoiceNumber }}
+                    </div>
                 </div>
                 <div>
                     <label class="block mb-1">Invoice Date*</label>
@@ -226,6 +232,7 @@ import axios from '../../../api/dashboardAxios';
 const route = useRoute();
 const router = useRouter();
 const id = route.params.id;
+const nextInvoiceNumber = ref(null);
 const f = ref({
     invoice_number: '',
     invoice_date: new Date().toISOString().split("T")[0],
@@ -299,13 +306,23 @@ const save = async () => {
     };
     id
         ? await axios.put(`invoices/${id}`, data)
-        : await axios.post("invoices", data);
+        : await axios.post("invoices", { ...data, invoice_number: f.value.invoice_number || null });
     router.push("/app/invoices/invoices");
 };
 onMounted(async () => {
     if (id) {
         const data = await axios.get(`invoices/${id}`);
         f.value = data;
+    } else {
+        // Generate next invoice number for display
+        try {
+            const response = await axios.get('invoices/next-number');
+            nextInvoiceNumber.value = response.next_number;
+            f.value.invoice_number = response.next_number;
+        } catch (e) {
+            console.warn('Could not fetch next invoice number:', e);
+            // Backend will generate on save if not provided
+        }
     }
 });
 </script>

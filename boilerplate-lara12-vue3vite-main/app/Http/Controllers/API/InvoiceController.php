@@ -51,4 +51,8 @@ class InvoiceController extends Controller {
         $pdf = Pdf::loadView('invoices.pdf', compact('invoice'))->setPaper('a4');
         return $pdf->stream("Invoice-{$invoice->invoice_number}.pdf");
     }
+    
+    public function nextNumber() {
+        return response()->json(['next_number' => Invoice::generateNumber()]);
+    }
 }
