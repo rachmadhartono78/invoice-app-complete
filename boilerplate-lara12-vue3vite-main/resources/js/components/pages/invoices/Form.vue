@@ -136,14 +136,6 @@
                             ✓ {{ it.item_name }}
                         </div>
                     </div>
-                            class="absolute top-full left-0 right-0 mt-1 border border-gray-300 bg-white rounded z-10 px-2 py-2 text-xs text-gray-500 shadow-lg">
-                            No items found
-                        </div>
-                        <!-- Display selected item -->
-                        <div v-if="it.item_id" class="text-xs text-blue-600 mt-1">
-                            ✓ {{ it.item_name }}
-                        </div>
-                    </div>
                     <div>
                         <label class="block text-xs">Code</label
                         ><input

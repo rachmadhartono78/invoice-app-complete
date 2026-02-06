@@ -149,15 +149,14 @@ router.beforeEach((to, _from, next) => {``
         return next('/app/auth?destination=' + to.fullPath);
     }
 
-    const accessibleWithoutAuth = ['home', 'profile', 'notification'];
-
     // Optional: Uncomment to enable menu-based authorization
     const getMenus = authStore.getMenus;
     const isAuthorized = getMenus.some(menu => to.path.startsWith(menu.full_path));
     console.log(`Navigating to ${to.fullPath}, Authorized: ${isAuthorized}`);
     
-    // if (!isAuthorized && to.meta.requiresAuth === true && !accessibleWithoutAuth.includes(to.name as string)) {
+    // if (!isAuthorized && to.meta.requiresAuth === true && !['home', 'profile', 'notification'].includes(to.name as string)) {
     //     return next('/not-found');
+
     // }
 
     next();
