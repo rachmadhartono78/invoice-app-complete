@@ -119,14 +119,14 @@
 </template>
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import axios from '../../../api/dashboardAxios';
 const invoices = ref([]);
 const search = ref("");
 const status = ref("");
 const page = ref(1);
 const pages = ref(1);
 const load = async (p = page.value) => {
-    const { data } = await axios.get("/api/invoices", {
+    const data = await axios.get("invoices", {
         params: { page: p, search: search.value, status: status.value },
     });
     invoices.value = data.data;
@@ -135,7 +135,7 @@ const load = async (p = page.value) => {
 };
 const del = async (id) => {
     if (!confirm("Delete?")) return;
-    await axios.delete(`/api/invoices/${id}`);
+    await axios.delete(`invoices/${id}`);
     load();
 };
 const fmt = (n) => new Intl.NumberFormat("id").format(n);
