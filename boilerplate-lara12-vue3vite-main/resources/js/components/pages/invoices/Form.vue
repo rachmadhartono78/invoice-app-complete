@@ -3,6 +3,15 @@
         <h1 class="text-2xl font-bold mb-6">
             {{ id ? "Edit" : "New" }} Invoice
         </h1>
+        
+        <!-- Required Fields Legend -->
+        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded flex items-start gap-2">
+            <div class="text-sm">
+                <span class="font-semibold">Tanda: <span class="text-red-600 font-bold text-lg">*</span> = Field wajib diisi</span>
+                <p class="text-xs text-gray-600 mt-1">Pastikan semua field yang ditandai sudah terisi sebelum menyimpan.</p>
+            </div>
+        </div>
+        
         <form
             @submit.prevent="save"
             class="bg-white p-6 rounded shadow space-y-6"
@@ -23,13 +32,17 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block mb-1">Invoice Date*</label>
+                    <label class="block mb-1">Invoice Date <span class="text-red-600 font-bold">*</span></label>
                     <input
                         v-model="f.invoice_date"
                         type="date"
                         required
-                        class="border px-3 py-2 rounded w-full"
+                        :class="[
+                            'border px-3 py-2 rounded w-full',
+                            errors.invoice_date ? 'border-red-600 bg-red-50' : 'border-gray-300'
+                        ]"
                     />
+                    <div v-if="errors.invoice_date" class="text-red-600 text-xs mt-1">{{ errors.invoice_date }}</div>
                 </div>
                 <div>
                     <label class="block mb-1">Currency</label>
@@ -39,12 +52,16 @@
                     />
                 </div>
                 <div class="col-span-2">
-                    <label class="block mb-1">Customer*</label>
+                    <label class="block mb-1">Customer <span class="text-red-600 font-bold">*</span></label>
                     <input
                         v-model="f.customer_name"
                         required
-                        class="border px-3 py-2 rounded w-full"
+                        :class="[
+                            'border px-3 py-2 rounded w-full',
+                            errors.customer_name ? 'border-red-600 bg-red-50' : 'border-gray-300'
+                        ]"
                     />
+                    <div v-if="errors.customer_name" class="text-red-600 text-xs mt-1">{{ errors.customer_name }}</div>
                 </div>
                 <div>
                     <label class="block mb-1">PO Number</label>
@@ -77,59 +94,84 @@
                 </div>
             </div>
             <div>
-                <h3 class="font-bold mb-2">Items</h3>
+                <h3 class="font-bold mb-2">Items <span class="text-red-600 font-bold">*</span> (At least 1 item required)</h3>
+                <div v-if="errors.items" class="mb-2 p-3 bg-red-50 border border-red-600 rounded text-red-700 text-sm">
+                    ⚠️ {{ errors.items }}
+                </div>
                 <div
                     v-for="(it, i) in f.items"
                     :key="i"
                     class="grid grid-cols-7 gap-2 mb-2 items-end"
                 >
-                    <div>
-                        <label class="block text-xs">Select Item*</label>
-                        <select
-                            @change="selectItem(i, $event)"
-                            class="border px-2 py-1 rounded w-full text-sm"
-                        >
-                            <option value="">-- Choose Item --</option>
-                            <option
-                                v-for="item in masterItems"
+                    <div class="relative">
+                        <label class="block text-xs">Select Item <span class="text-red-600 font-bold">*</span></label>
+                        <input
+                            v-model="itemSearch[i]"
+                            type="text"
+                            placeholder="Search item..."
+                            @focus="itemSearch[i] = itemSearch[i] || ''"
+                            :class="[
+                                'border px-2 py-1 rounded w-full text-sm',
+                                !it.item_id && Object.keys(errors).length > 0 ? 'border-red-600 bg-red-50' : 'border-gray-300'
+                            ]"
+                        />
+                        <!-- Dropdown hasil search -->
+                        <div v-if="itemSearch[i] && getFilteredItems(i).length > 0"
+                            class="absolute top-full left-0 right-0 mt-1 border border-gray-300 bg-white rounded z-10 max-h-48 overflow-y-auto shadow-lg">
+                            <div v-for="item in getFilteredItems(i)"
                                 :key="item.id"
-                                :value="item.id"
-                                :selected="it.item_id === item.id"
-                            >
-                                {{ item.name }} ({{ item.unit }})
-                            </option>
-                        </select>
+                                @click="selectItemFromSearch(i, item)"
+                                class="px-2 py-2 hover:bg-blue-100 cursor-pointer text-sm border-b border-gray-200 last:border-b-0">
+                                <div class="font-semibold text-gray-800">{{ item.name }}</div>
+                                <div class="text-xs text-gray-500">{{ item.code }} • {{ item.unit }} • Rp {{ fmt(item.price) }}</div>
+                            </div>
+                        </div>
+                        <!-- Pesan jika tidak ada hasil search -->
+                        <div v-if="itemSearch[i] && getFilteredItems(i).length === 0"
+                            class="absolute top-full left-0 right-0 mt-1 border border-gray-300 bg-white rounded z-10 px-2 py-2 text-xs text-gray-500 shadow-lg">
+                            No items found
+                        </div>
+                        <!-- Display selected item -->
+                        <div v-if="it.item_id" class="text-xs text-blue-600 mt-1">
+                            ✓ {{ it.item_name }}
+                        </div>
                     </div>
                     <div>
                         <label class="block text-xs">Code</label
                         ><input
                             v-model="it.item_code"
-                            class="border px-2 py-1 rounded w-full text-sm"
+                            class="border border-gray-300 px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
                     <div>
                         <label class="block text-xs">Name</label
                         ><input
                             v-model="it.item_name"
-                            class="border px-2 py-1 rounded w-full text-sm"
+                            class="border border-gray-300 px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-xs">Qty*</label
+                        <label class="block text-xs">Qty <span class="text-red-600 font-bold">*</span></label
                         ><input
                             v-model.number="it.quantity"
                             type="number"
                             required
-                            class="border px-2 py-1 rounded w-full text-sm"
+                            :class="[
+                                'border px-2 py-1 rounded w-full text-sm',
+                                !it.quantity && Object.keys(errors).length > 0 ? 'border-red-600 bg-red-50' : 'border-gray-300'
+                            ]"
                         />
                     </div>
                     <div>
-                        <label class="block text-xs">Price*</label
+                        <label class="block text-xs">Price <span class="text-red-600 font-bold">*</span></label
                         ><input
                             v-model.number="it.unit_price"
                             type="number"
                             required
-                            class="border px-2 py-1 rounded w-full text-sm"
+                            :class="[
+                                'border px-2 py-1 rounded w-full text-sm',
+                                !it.unit_price && Object.keys(errors).length > 0 ? 'border-red-600 bg-red-50' : 'border-gray-300'
+                            ]"
                         />
                     </div>
                     <div>
@@ -137,12 +179,12 @@
                         ><input
                             v-model.number="it.discount"
                             type="number"
-                            class="border px-2 py-1 rounded w-full text-sm"
+                            class="border border-gray-300 px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
                     <div class="flex gap-1">
                         <span
-                            class="border px-2 py-1 rounded bg-gray-100 text-sm flex-1"
+                            class="border border-gray-300 px-2 py-1 rounded bg-gray-100 text-sm flex-1"
                             >{{
                                 fmt(
                                     (it.quantity || 0) * (it.unit_price || 0) -
@@ -152,8 +194,8 @@
                         >
                         <button
                             type="button"
-                            @click="f.items.splice(i, 1)"
-                            class="text-red-600"
+                            @click="deleteItem(i)"
+                            class="text-red-600 hover:text-red-800"
                         >
                             🗑
                         </button>
@@ -161,17 +203,8 @@
                 </div>
                 <button
                     type="button"
-                    @click="
-                        f.items.push({
-                            item_id: null,
-                            item_code: '',
-                            item_name: '',
-                            quantity: 1,
-                            unit_price: 0,
-                            discount: 0,
-                        })
-                    "
-                    class="text-blue-600 text-sm"
+                    @click="addNewItem"
+                    class="text-blue-600 text-sm hover:text-blue-800"
                 >
                     + Add Item
                 </button>
@@ -252,6 +285,8 @@ const router = useRouter();
 const id = route.params.id;
 const nextInvoiceNumber = ref(null);
 const masterItems = ref([]); // Master items list for dropdown
+const errors = ref({});
+const itemSearch = ref({}); // Track search for each item row
 
 const f = ref({
     invoice_number: '',
@@ -388,6 +423,34 @@ function terbilangIndo(n) {
     return result.trim() + " rupiah";
 }
 const save = async () => {
+    // Reset errors
+    errors.value = {};
+    
+    // Validation
+    if (!f.value.invoice_date) {
+        errors.value.invoice_date = 'Invoice Date is required';
+    }
+    if (!f.value.customer_name || f.value.customer_name.trim() === '') {
+        errors.value.customer_name = 'Customer name is required';
+    }
+    
+    // Validate items
+    if (!f.value.items || f.value.items.length === 0) {
+        errors.value.items = 'At least one item is required';
+    } else {
+        const invalidItems = f.value.items.filter(it => !it.item_id || !it.quantity || !it.unit_price);
+        if (invalidItems.length > 0) {
+            errors.value.items = `Please fill in: Item Selection, Quantity, and Price for all items`;
+        }
+    }
+    
+    // If there are errors, scroll to top and stop
+    if (Object.keys(errors.value).length > 0) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        alert('❌ Please fill in all required fields (marked with *)');
+        return;
+    }
+    
     const sub = subtotal.value;
     const afterDisc = sub - (f.value.discount || 0);
     const ppnAmt = (afterDisc * (f.value.ppn_percent || 0)) / 100;
@@ -425,6 +488,59 @@ const selectItem = (index, event) => {
             f.value.items[index].quantity = selectedMasterItem.quantity || 1;
         }
     }
+};
+
+const getFilteredItems = (index) => {
+    const search = (itemSearch.value[index] || '').toLowerCase();
+    if (!search) return [];
+    
+    return masterItems.value.filter(item => 
+        item.name.toLowerCase().includes(search) ||
+        (item.code && item.code.toLowerCase().includes(search))
+    ).slice(0, 10); // Limit to 10 results
+};
+
+const selectItemFromSearch = (index, item) => {
+    f.value.items[index].item_id = item.id;
+    f.value.items[index].item_code = item.code || '';
+    f.value.items[index].item_name = item.name;
+    f.value.items[index].unit_price = item.price || 0;
+    
+    // Keep quantity as is (user should set this)
+    if (f.value.items[index].quantity === 1) {
+        f.value.items[index].quantity = item.quantity || 1;
+    }
+    
+    // Clear search after selection
+    itemSearch.value[index] = '';
+};
+
+const addNewItem = () => {
+    const newIndex = f.value.items.length;
+    f.value.items.push({
+        item_id: null,
+        item_code: '',
+        item_name: '',
+        quantity: 1,
+        unit_price: 0,
+        discount: 0,
+    });
+    itemSearch.value[newIndex] = ''; // Initialize search for new item
+};
+
+const deleteItem = (index) => {
+    f.value.items.splice(index, 1);
+    // Clean up itemSearch when item is deleted
+    const newSearch = {};
+    Object.keys(itemSearch.value).forEach((key) => {
+        const idx = parseInt(key);
+        if (idx < index) {
+            newSearch[idx] = itemSearch.value[idx];
+        } else if (idx > index) {
+            newSearch[idx - 1] = itemSearch.value[idx];
+        }
+    });
+    itemSearch.value = newSearch;
 };
 
 onMounted(async () => {
