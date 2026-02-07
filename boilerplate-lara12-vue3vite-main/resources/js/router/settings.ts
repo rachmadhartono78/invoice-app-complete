@@ -11,6 +11,15 @@ const settingsRoutes: RouteRecordRaw[] = [
                 },
                 children: [
                     {
+                        path: "dashboard",
+                        name: "settings-dashboard",
+                        meta: {
+                            breadcrumb: "Dashboard",
+                        },
+                        component: () =>
+                            import("@/components/pages/settings/Dashboard.vue"),
+                    },
+                    {
                         path: "",
                         name: "index-manage",
                         component: () =>

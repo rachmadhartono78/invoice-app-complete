@@ -8,6 +8,24 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- System Dashboard Card (Relocated Old Home) -->
+            <router-link
+                to="/app/settings/manage/dashboard"
+                class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 transition-colors"
+            >
+                <div class="flex items-center mb-4">
+                    <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900">
+                        <svg class="w-6 h-6 text-orange-600 dark:text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                        </svg>
+                    </div>
+                </div>
+                <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">System Dashboard</h5>
+                <p class="text-sm text-gray-700 dark:text-gray-400">
+                    Overview of system statistics including total users, organizations, and quick management links.
+                </p>
+            </router-link>
+
             <!-- Applications Card -->
             <router-link
                 to="/app/settings/manage/applications"

@@ -16,6 +16,7 @@ use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\ItemController;
 use App\Http\Controllers\API\CustomerController;
 use App\Http\Controllers\API\PaymentController;
+use App\Http\Controllers\API\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -106,6 +107,11 @@ Route::middleware(['auth:sanctum', LogApiRequests::class])->group(function () {
             // Notification testing
             Route::post('notifications/test', [NotificationTestController::class, 'sendTest']);
         });
+    });
+
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/stats', [DashboardController::class, 'stats']);
+        Route::get('/report/export', [DashboardController::class, 'exportReport']);
     });
 
     
