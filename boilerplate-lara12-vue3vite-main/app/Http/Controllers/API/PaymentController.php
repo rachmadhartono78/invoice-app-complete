@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Invoice;
+use App\Events\PaymentReceived;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -79,20 +80,9 @@ class PaymentController extends Controller
             $validated['created_by'] = auth()->id();
             
             $payment = Payment::create($validated);
-
-            // Update invoice paid_amount and status
-            $newTotalPaid = $totalPaid + $validated['amount'];
-            $invoice->paid_amount = $newTotalPaid;
-
-            if ($newTotalPaid >= $invoice->total) {
-                $invoice->status = 'PAID';
-                $invoice->paid_at = now();
-                $invoice->paid_by = auth()->id();
-            } elseif ($newTotalPaid > 0) {
-                $invoice->status = 'PARTIAL_PAID';
-            }
-
-            $invoice->save();
+            
+            // Dispatch event to update invoice status
+            PaymentReceived::dispatch($payment);
 
             DB::commit();
 
@@ -140,18 +130,8 @@ class PaymentController extends Controller
 
             $payment->update($validated);
 
-            // Update invoice status
-            $invoice->paid_amount = $newTotalPaid;
-            
-            if ($newTotalPaid >= $invoice->total) {
-                $invoice->status = 'PAID';
-            } elseif ($newTotalPaid > 0) {
-                $invoice->status = 'PARTIAL_PAID';
-            } else {
-                $invoice->status = 'INVOICED';
-            }
-
-            $invoice->save();
+            // Dispatch event to update invoice status
+            PaymentReceived::dispatch($payment);
 
             DB::commit();
 
@@ -176,21 +156,8 @@ class PaymentController extends Controller
             $paymentAmount = $payment->amount;
             $payment->delete();
 
-            // Recalculate invoice paid amount and status
-            $newTotalPaid = $invoice->payments()->sum('amount');
-            $invoice->paid_amount = $newTotalPaid;
-
-            if ($newTotalPaid >= $invoice->total) {
-                $invoice->status = 'PAID';
-            } elseif ($newTotalPaid > 0) {
-                $invoice->status = 'PARTIAL_PAID';
-            } else {
-                $invoice->status = 'INVOICED';
-                $invoice->paid_at = null;
-                $invoice->paid_by = null;
-            }
-
-            $invoice->save();
+            // Dispatch event to update invoice status (recalculation)
+            PaymentReceived::dispatch($payment);
 
             DB::commit();
 

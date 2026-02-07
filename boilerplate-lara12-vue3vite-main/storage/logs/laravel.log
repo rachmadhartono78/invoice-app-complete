@@ -1840,3 +1840,7 @@
 [stacktrace]
 #0 {main}
 "} 
+[2026-02-07 09:07:33] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at C:/Users/BSI-5-2200049/Documents/vscode/invoice-app-complete/boilerplate-lara12-vue3vite-main/storage/framework/views/4609fa7f197c630ba537ddb6599c0c34.php:1)
+[stacktrace]
+#0 {main}
+"} 
