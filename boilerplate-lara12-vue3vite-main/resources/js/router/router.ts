@@ -85,10 +85,6 @@ const routes: RouteRecordRaw[] = [
                         component: () => import("@/components/main/Home.vue"),
                     },
 
-                  
-
-
-
                     {
                         path: "profile",
                         name: 'profile',
@@ -129,7 +125,8 @@ const router = createRouter({
     routes,
 });
 
-router.beforeEach((to, _from, next) => {``
+router.beforeEach((to, _from, next) => {
+    ``
     const authStore = useAuthStore();
     const { isAuthenticated } = authStore;
 
@@ -153,7 +150,7 @@ router.beforeEach((to, _from, next) => {``
     const getMenus = authStore.getMenus;
     const isAuthorized = getMenus.some(menu => to.path.startsWith(menu.full_path));
     console.log(`Navigating to ${to.fullPath}, Authorized: ${isAuthorized}`);
-    
+
     // if (!isAuthorized && to.meta.requiresAuth === true && !['home', 'profile', 'notification'].includes(to.name as string)) {
     //     return next('/not-found');
 
