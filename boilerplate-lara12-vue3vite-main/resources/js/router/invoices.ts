@@ -15,38 +15,32 @@ const invoicesRoutes: RouteRecordRaw[] = [
                 },
                 component: () => import("@/components/pages/quotations/Index.vue"),
             },
+            // Items routes - MUST be before invoices/:id to avoid matching "items" as :id
             {
-                path: "invoices",
-                name: "invoices-index",
+                path: "items",
+                name: "items-index",
                 meta: {
-                    breadcrumb: "Faktur",
+                    breadcrumb: "Produk & Layanan",
                 },
-                component: () => import("@/components/pages/invoices/Index.vue"),
+                component: () => import("@/components/pages/items/Index.vue"),
             },
             {
-                path: "invoices/create",
-                name: "invoices-create",
+                path: "items/create",
+                name: "items-create",
                 meta: {
-                    breadcrumb: "Buat Faktur",
+                    breadcrumb: "Tambah Produk",
                 },
-                component: () => import("@/components/pages/invoices/Form.vue"),
+                component: () => import("@/components/pages/items/Form.vue"),
             },
             {
-                path: "invoices/:id",
-                name: "invoices-view",
+                path: "items/:id/edit",
+                name: "items-edit",
                 meta: {
-                    breadcrumb: "Detail Faktur",
+                    breadcrumb: "Edit Produk",
                 },
-                component: () => import("@/components/pages/invoices/View.vue"),
+                component: () => import("@/components/pages/items/Form.vue"),
             },
-            {
-                path: "invoices/:id/edit",
-                name: "invoices-edit",
-                meta: {
-                    breadcrumb: "Edit Faktur",
-                },
-                component: () => import("@/components/pages/invoices/Form.vue"),
-            },
+            // Customers routes
             {
                 path: "customers",
                 name: "customers-index",
@@ -71,6 +65,7 @@ const invoicesRoutes: RouteRecordRaw[] = [
                 },
                 component: () => import("@/components/pages/customers/Form.vue"),
             },
+            // Payments routes
             {
                 path: "payments",
                 name: "payments-index",
@@ -95,29 +90,38 @@ const invoicesRoutes: RouteRecordRaw[] = [
                 },
                 component: () => import("@/components/pages/payments/Form.vue"),
             },
+            // Invoices routes - :id routes MUST be last to avoid matching other paths
             {
-                path: "items",
-                name: "items-index",
+                path: "invoices",
+                name: "invoices-index",
                 meta: {
-                    breadcrumb: "Produk & Layanan",
+                    breadcrumb: "Faktur",
                 },
-                component: () => import("@/components/pages/items/Index.vue"),
+                component: () => import("@/components/pages/invoices/Index.vue"),
             },
             {
-                path: "items/create",
-                name: "items-create",
+                path: "invoices/create",
+                name: "invoices-create",
                 meta: {
-                    breadcrumb: "Tambah Produk",
+                    breadcrumb: "Buat Faktur",
                 },
-                component: () => import("@/components/pages/items/Form.vue"),
+                component: () => import("@/components/pages/invoices/Form.vue"),
             },
             {
-                path: "items/:id/edit",
-                name: "items-edit",
+                path: "invoices/:id/edit",
+                name: "invoices-edit",
                 meta: {
-                    breadcrumb: "Edit Produk",
+                    breadcrumb: "Edit Faktur",
                 },
-                component: () => import("@/components/pages/items/Form.vue"),
+                component: () => import("@/components/pages/invoices/Form.vue"),
+            },
+            {
+                path: "invoices/:id",
+                name: "invoices-view",
+                meta: {
+                    breadcrumb: "Detail Faktur",
+                },
+                component: () => import("@/components/pages/invoices/View.vue"),
             },
         ],
     },

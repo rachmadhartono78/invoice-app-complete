@@ -201,8 +201,8 @@ export default {
     methods: {
         async loadCategories() {
             try {
-                const { data } = await dashboardAxios.get('/items/categories');
-                this.categories = data?.data || [];
+                const response = await dashboardAxios.get('/items/categories');
+                this.categories = response?.data || [];
             } catch (error) {
                 console.error('Failed to load categories:', error);
                 this.categories = [];
@@ -216,15 +216,16 @@ export default {
                     per_page: 60, // Optimized: 60 items is a good balance for grid view
                     ...this.filters
                 };
-                const { data } = await dashboardAxios.get('/items', { params });
-                this.items = data?.data || [];
+                const response = await dashboardAxios.get('/items', { params });
+                // dashboardAxios interceptor returns response.data, so 'response' is already the paginated object
+                this.items = response?.data || [];
                 this.pagination = {
-                    current_page: data?.current_page || 1,
-                    last_page: data?.last_page || 1,
-                    per_page: data?.per_page || 15,
-                    total: data?.total || 0,
-                    from: data?.from || 0,
-                    to: data?.to || 0
+                    current_page: response?.current_page || 1,
+                    last_page: response?.last_page || 1,
+                    per_page: response?.per_page || 15,
+                    total: response?.total || 0,
+                    from: response?.from || 0,
+                    to: response?.to || 0
                 };
             } catch (error) {
                 console.error('Failed to load items:', error);
