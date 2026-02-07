@@ -114,6 +114,13 @@ Route::middleware(['auth:sanctum', LogApiRequests::class])->group(function () {
             Route::put('/{invoice}',[InvoiceController::class,'update']);
             Route::delete('/{invoice}',[InvoiceController::class,'destroy']);
             Route::get('/{invoice}/pdf',[InvoiceController::class,'pdf']);
+            
+            // Status action routes
+            Route::post('/{invoice}/mark-as-quoted',[InvoiceController::class,'markAsQuoted']);
+            Route::post('/{invoice}/mark-as-invoiced',[InvoiceController::class,'markAsInvoiced']);
+            Route::post('/{invoice}/mark-as-paid',[InvoiceController::class,'markAsPaid']);
+            Route::post('/{invoice}/mark-as-partial-paid',[InvoiceController::class,'markAsPartialPaid']);
+            Route::post('/{invoice}/mark-as-void',[InvoiceController::class,'markAsVoid']);
         });
 
         Route::prefix('items')->group(function(){

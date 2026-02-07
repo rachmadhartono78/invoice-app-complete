@@ -125,6 +125,7 @@
                                 <div class="font-semibold text-gray-800">{{ item.name }}</div>
                                 <div class="text-xs text-gray-500">{{ item.code }} • {{ item.unit }} • Rp {{ fmt(item.price) }}</div>
                             </div>
+
                         </div>
                         <!-- Pesan jika tidak ada hasil search -->
                         <div v-if="itemSearch[i] && getFilteredItems(i).length === 0"
@@ -446,6 +447,8 @@ const save = async () => {
     
     const data = {
         ...f.value,
+        // Ensure date is in YYYY-MM-DD format
+        invoice_date: formatDateForInput(f.value.invoice_date),
         subtotal: sub,
         discount: f.value.discount || 0,
         ppn_percent: f.value.ppn_percent || 0,
@@ -533,17 +536,32 @@ const deleteItem = (index) => {
     Object.assign(itemSearch, newSearch);
 };
 
+const formatDateForInput = (dateStr) => {
+    if (!dateStr) return '';
+    // Handle ISO format: 2026-02-06T00:00:00.000000Z → 2026-02-06
+    if (dateStr.includes('T')) {
+        return dateStr.split('T')[0];
+    }
+    // Already in YYYY-MM-DD format
+    return dateStr;
+};
+
 onMounted(async () => {
     // Load master items
     try {
         const response = await axios.get('items?per_page=100');
-        masterItems.value = response.data;
+        // Handle both paginated and array responses
+        masterItems.value = Array.isArray(response.data) ? response.data : response.data.data || response.data;
     } catch (e) {
         console.warn('Could not load master items:', e);
     }
 
     if (id) {
         const data = await axios.get(`invoices/${id}`);
+        // Ensure invoice_date is in YYYY-MM-DD format
+        if (data.invoice_date) {
+            data.invoice_date = formatDateForInput(data.invoice_date);
+        }
         f.value = data;
     } else {
         // Generate next invoice number for display
