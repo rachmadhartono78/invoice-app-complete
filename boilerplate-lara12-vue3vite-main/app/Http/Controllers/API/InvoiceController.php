@@ -30,31 +30,29 @@ class InvoiceController extends Controller {
     
     public function unpaid(Request $request) {
         // Get invoices that are not fully paid and not void/draft
-        $query = Invoice::with(['payments'])
+        $invoices = Invoice::with(['payments'])
             ->whereNotIn('status', ['PAID', 'VOID', 'DRAFT', 'paid', 'void', 'draft'])
-            ->select('id', 'invoice_number', 'customer_name', 'total', 'status', 'invoice_date');
-        
-        $invoices = $query->orderBy('invoice_date', 'desc')
-                          ->limit($request->per_page ?? 100)
-                          ->get();
-        
-        // Calculate remaining balance for each invoice
-        $invoices = $invoices->map(function($invoice) {
-            $paidAmount = $invoice->payments->sum('amount');
-            return [
-                'id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
-                'customer_name' => $invoice->customer_name,
-                'invoice_date' => $invoice->invoice_date,
-                'total' => $invoice->total,
-                'paid_amount' => $paidAmount,
-                'remaining_balance' => $invoice->total - $paidAmount,
-                'status' => $invoice->status
-            ];
-        })->filter(function($invoice) {
-            // Only return invoices with remaining balance > 0
-            return $invoice['remaining_balance'] > 0;
-        })->values();
+            ->get()
+            ->map(function($invoice) {
+                $paidAmount = $invoice->payments->sum('amount');
+                $remainingBalance = $invoice->total - $paidAmount;
+                
+                return [
+                    'id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'customer_name' => $invoice->customer_name,
+                    'invoice_date' => $invoice->invoice_date,
+                    'total' => (float) $invoice->total,
+                    'paid_amount' => (float) $paidAmount,
+                    'remaining_balance' => (float) $remainingBalance,
+                    'status' => $invoice->status
+                ];
+            })
+            ->filter(function($invoice) {
+                // Only return invoices with remaining balance > 0
+                return $invoice['remaining_balance'] > 0.01; // Use 0.01 to handle float precision
+            })
+            ->values();
         
         return response()->json(['data' => $invoices]);
     }
