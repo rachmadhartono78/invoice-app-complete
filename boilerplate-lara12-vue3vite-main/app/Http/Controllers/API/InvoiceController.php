@@ -55,7 +55,8 @@ class InvoiceController extends Controller {
             'items.*.item_name' => 'required',
             'items.*.quantity' => 'required|numeric',
             'items.*.unit_price' => 'required|numeric',
-            'items.*.discount' => 'nullable|numeric'
+            'items.*.discount' => 'nullable|numeric',
+            'items.*.area' => 'nullable|string'
         ]);
 
         // Set status and audit fields
@@ -70,6 +71,7 @@ class InvoiceController extends Controller {
                 $validatedItem = [
                     'item_code' => $item['item_code'] ?? '',
                     'item_name' => $item['item_name'] ?? '',
+                    'area' => $item['area'] ?? null,
                     'item_id' => $item['item_id'] ?? null,
                     'quantity' => $item['quantity'] ?? 0,
                     'unit_price' => $item['unit_price'] ?? 0,
@@ -124,7 +126,8 @@ class InvoiceController extends Controller {
             'items.*.item_name' => 'required',
             'items.*.quantity' => 'required|numeric',
             'items.*.unit_price' => 'required|numeric',
-            'items.*.discount' => 'nullable|numeric'
+            'items.*.discount' => 'nullable|numeric',
+            'items.*.area' => 'nullable|string'
         ]);
 
         // Use transaction to ensure data consistency
@@ -138,6 +141,7 @@ class InvoiceController extends Controller {
                 $validatedItem = [
                     'item_code' => $item['item_code'] ?? '',
                     'item_name' => $item['item_name'] ?? '',
+                    'area' => $item['area'] ?? null,
                     'item_id' => $item['item_id'] ?? null,
                     'quantity' => $item['quantity'] ?? 0,
                     'unit_price' => $item['unit_price'] ?? 0,
