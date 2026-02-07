@@ -134,8 +134,8 @@
             <div class="flex gap-4 mt-6">
                 <button
                     type="submit"
-                    :disabled="loading"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded disabled:opacity-50"
+                    :disabled="loading || !form.invoice_id"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {{ loading ? 'Saving...' : (isEdit ? 'Update' : 'Record Payment') }}
                 </button>
@@ -185,6 +185,7 @@ export default {
     },
     methods: {
         async loadUnpaidInvoices() {
+            this.loading = true;
             try {
                 const invoices = await dashboardAxios.get('/invoices/unpaid');
                 this.unpaidInvoices = invoices || [];
@@ -192,6 +193,8 @@ export default {
             } catch (error) {
                 console.error('Failed to load invoices:', error);
                 this.$emit('showToast', 'Failed to load invoices', 'error');
+            } finally {
+                this.loading = false;
             }
         },
         async loadPayment() {
