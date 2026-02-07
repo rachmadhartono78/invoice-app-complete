@@ -22,8 +22,7 @@
                     class="flex items-center justify-between mr-4">
                     <!-- <img src="https://elogbook.com.au/wp-content/uploads/2020/08/elogbook_orange_no_tagline.png.jpg" class="mr-3 h-8"
                                 alt="Flowbite Logo" /> -->
-                    <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">codacore</span>
-                    <small class="self-end ml-1 dark:text-white">v.1.0</small>
+                    <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">PT.EDO MANDIRI PRATAMA</span>
                 </a>
             </div>
             <div class="relative flex items-center lg:order-2">
