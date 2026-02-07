@@ -140,7 +140,6 @@
                 </button>
             </div>
         </div>
-        </div>
         
         <ImportModal
             :show="showImportModal"
@@ -203,9 +202,10 @@ export default {
         async loadCategories() {
             try {
                 const { data } = await dashboardAxios.get('/items/categories');
-                this.categories = data.data; // API returns paginated data, maybe logic needs adjustment if lots of categories
+                this.categories = data?.data || [];
             } catch (error) {
                 console.error('Failed to load categories:', error);
+                this.categories = [];
             }
         },
         async load() {
@@ -217,17 +217,18 @@ export default {
                     ...this.filters
                 };
                 const { data } = await dashboardAxios.get('/items', { params });
-                this.items = data.data;
+                this.items = data?.data || [];
                 this.pagination = {
-                    current_page: data.current_page,
-                    last_page: data.last_page,
-                    per_page: data.per_page,
-                    total: data.total,
-                    from: data.from,
-                    to: data.to
+                    current_page: data?.current_page || 1,
+                    last_page: data?.last_page || 1,
+                    per_page: data?.per_page || 15,
+                    total: data?.total || 0,
+                    from: data?.from || 0,
+                    to: data?.to || 0
                 };
             } catch (error) {
                 console.error('Failed to load items:', error);
+                this.items = []; // Reset to empty array on error
                 this.$emit('showToast', 'Failed to load items', 'error');
             } finally {
                 this.loading = false;
