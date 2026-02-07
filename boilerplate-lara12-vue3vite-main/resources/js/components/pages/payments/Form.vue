@@ -151,18 +151,12 @@ export default {
     methods: {
         async loadUnpaidInvoices() {
             try {
-                const { data } = await dashboardAxios.get('/invoices', {
-                    params: { 
-                        status: 'INVOICED,PARTIAL_PAID',
-                        per_page: 100
-                    }
-                });
-                this.unpaidInvoices = data.data.map(inv => ({
-                    ...inv,
-                    remaining_balance: inv.total - (inv.paid_amount || 0)
-                }));
+                const { data } = await dashboardAxios.get('/invoices/unpaid');
+                this.unpaidInvoices = data.data || [];
+                console.log('Loaded unpaid invoices:', this.unpaidInvoices.length);
             } catch (error) {
                 console.error('Failed to load invoices:', error);
+                this.$emit('showToast', 'Failed to load invoices', 'error');
             }
         },
         async loadPayment() {

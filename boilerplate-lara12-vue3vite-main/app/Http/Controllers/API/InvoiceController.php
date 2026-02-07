@@ -28,6 +28,37 @@ class InvoiceController extends Controller {
         return $query->orderBy('invoice_date', 'desc')->paginate($request->per_page ?? 15);
     }
     
+    public function unpaid(Request $request) {
+        // Get invoices that are not fully paid and not void/draft
+        $query = Invoice::with(['payments'])
+            ->whereNotIn('status', ['PAID', 'VOID', 'DRAFT', 'paid', 'void', 'draft'])
+            ->select('id', 'invoice_number', 'customer_name', 'total', 'status', 'invoice_date');
+        
+        $invoices = $query->orderBy('invoice_date', 'desc')
+                          ->limit($request->per_page ?? 100)
+                          ->get();
+        
+        // Calculate remaining balance for each invoice
+        $invoices = $invoices->map(function($invoice) {
+            $paidAmount = $invoice->payments->sum('amount');
+            return [
+                'id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'customer_name' => $invoice->customer_name,
+                'invoice_date' => $invoice->invoice_date,
+                'total' => $invoice->total,
+                'paid_amount' => $paidAmount,
+                'remaining_balance' => $invoice->total - $paidAmount,
+                'status' => $invoice->status
+            ];
+        })->filter(function($invoice) {
+            // Only return invoices with remaining balance > 0
+            return $invoice['remaining_balance'] > 0;
+        })->values();
+        
+        return response()->json(['data' => $invoices]);
+    }
+    
     public function store(Request $request) {
         $data = $request->validate([
             'invoice_date' => 'required|date',
