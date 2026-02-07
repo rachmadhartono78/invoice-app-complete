@@ -75,7 +75,7 @@ export default {
             
             const data = res.user;
             console.log(data);
-            const authorityIds = data.authorities.map((a) => a.pivot.authority_id);
+            const authorityIds = data.authorities?.map((a) => a.pivot.authority_id) || [];
             data['authority_ids'] = authorityIds;
             useAuthStore().setUser(data);
             this.startCountdown();

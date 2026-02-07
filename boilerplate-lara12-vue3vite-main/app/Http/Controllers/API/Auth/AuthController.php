@@ -34,7 +34,8 @@ class AuthController extends Controller
         // First try normal authentication
         if (Auth::attempt($credentials)) {
             try {
-                $data = User::where('email', $credentials['email'])->firstOrFail();
+                // Get authenticated user directly (faster than querying again)
+                $data = auth()->user();
                 
                 // Check if email is verified
                 if (!$data->email_verified_at) {
@@ -44,12 +45,20 @@ class AuthController extends Controller
                     $data = null;
                 } else {
                     $token = $data->createToken($request->device_name)->plainTextToken;
-                    $this->getDataApplications($data);
-
+                    
+                    // Return minimal data for fast login (load app data separately)
                     $status = 200;
                     $result = true;
                     $message = 'Login sukses';
-                    $data['token'] = $token;
+                    
+                    // Only return essential user info + token
+                    $data = [
+                        'id' => $data->id,
+                        'name' => $data->name,
+                        'email' => $data->email,
+                        'avatar' => $data->avatar,
+                        'token' => $token,
+                    ];
                 }
             } catch (\Throwable $th) {
                 Log::error([
@@ -78,13 +87,19 @@ class AuthController extends Controller
                 if ($user && Hash::check($credentials['password'], $user->password)) {
                     try {
                         $token = $user->createToken($request->device_name)->plainTextToken;
-                        $this->getDataApplications($user);
 
                         $status = 200;
                         $result = true;
                         $message = 'Login sukses';
-                        $user['token'] = $token;
-                        $data = $user;
+                        
+                        // Return minimal data for fast login
+                        $data = [
+                            'id' => $user->id,
+                            'name' => $user->name,
+                            'email' => $user->email,
+                            'avatar' => $user->avatar,
+                            'token' => $token,
+                        ];
                     } catch (\Throwable $th) {
                         Log::error([
                             'error' => [
@@ -314,7 +329,7 @@ class AuthController extends Controller
                     // $user->load('roles');
                     // Auth::login($user);
                     $user['token'] = $user->createToken($request->device_name)->plainTextToken;
-                    $this->getDataApplications($user);
+                    // Removed heavy eager loading for faster login
                     $message = 'Berhasil masuk';
                     $status = 200;
                 } else {
@@ -332,7 +347,7 @@ class AuthController extends Controller
                     ]); 
                     $user['token'] = $user->createToken($request->device_name)->plainTextToken;
                     DB::commit();
-                    $this->getDataApplications($user);
+                    // Removed heavy eager loading for faster registration
                     $message = 'Berhasil mendaftar';
                     $status = 201;
                 }
@@ -512,7 +527,7 @@ class AuthController extends Controller
         // Generate token Sanctum
         $token = $data->createToken('otp wa'.$request->device_name)->plainTextToken;
         $data['token'] = $token;
-        $this->getDataApplications($data);
+        // Removed heavy eager loading for faster login
 
         return response()->json([
             'message' => 'Login berhasil',
@@ -700,7 +715,7 @@ class AuthController extends Controller
             }
             $user->update($dataToUpdate);
             $user['token'] = $user->createToken('yahoo')->plainTextToken;
-            $this->getDataApplications($user);
+            // Removed heavy eager loading for faster login
             $message = 'Berhasil masuk';
             $status = 200;
         } else {
@@ -720,7 +735,7 @@ class AuthController extends Controller
                     ]); 
 
             DB::commit();
-            $this->getDataApplications($user);
+            // Removed heavy eager loading for faster registration
             $message = 'Berhasil mendaftar';
             $status = 201;
         }
@@ -734,7 +749,8 @@ class AuthController extends Controller
     {
         $user = $request->user();
         if ($user) {
-            $user = $this->getDataApplications($user);
+            // Load authorities for compatibility (but use lazy loading in other places)
+            $user->load('organizations', 'authorities.application', 'authorities.menus.actions.action', 'authorities.organizations', 'authorities.menus.menuInduk', 'authorities.menus.application');
             $user['token'] = $request->bearerToken();
 
             return response()->json([
@@ -747,5 +763,31 @@ class AuthController extends Controller
             'valid' => false,
             'message' => 'Token tidak valid atau sudah expired',
         ], 401);
+    }
+
+    // Load application data (permissions, menus, organizations) - call this separately after login
+    public function loadAppData(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            // Load app data with full relationships
+            $user = $this->getDataApplications($user);
+
+            return response()->json([
+                'result' => true,
+                'data' => $user,
+                'message' => 'Data aplikasi berhasil dimuat',
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Load App Data Error: ' . $th->getMessage());
+            return response()->json([
+                'result' => false,
+                'message' => 'Gagal memuat data aplikasi',
+            ], 500);
+        }
     }
 }

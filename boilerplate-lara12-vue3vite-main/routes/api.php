@@ -71,6 +71,7 @@ Route::middleware(['auth:sanctum', LogApiRequests::class])->group(function () {
 
     // Check authentication
     Route::get('/me', [AuthController::class, 'checkToken']);
+    Route::get('/load-app-data', [AuthController::class, 'loadAppData']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'userInfo']);
 

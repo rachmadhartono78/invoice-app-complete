@@ -496,9 +496,25 @@ export default {
                 .catch(error => console.error('CSRF Error:', error));;
         },
         afterLogin(data) {
-            const authorityIds = data.authorities.map((authority) => authority.pivot.authority_id);
+            // Handle authorities if not loaded yet (for faster login)
+            const authorityIds = data.authorities?.map((authority) => authority.pivot.authority_id) || [];
             data['authority_ids'] = authorityIds;
             useAuthStore().setUser(data);
+            
+            // Load full app data (authorities, menus, etc.) in background
+            if (!data.authorities || data.authorities.length === 0) {
+                this.axios.get('auth/load-app-data')
+                    .then((response) => {
+                        if (response?.data?.result) {
+                            const fullData = response.data.data;
+                            const fullAuthorityIds = fullData.authorities?.map((authority) => authority.pivot.authority_id) || [];
+                            fullData['authority_ids'] = fullAuthorityIds;
+                            useAuthStore().setUser(fullData);
+                        }
+                    })
+                    .catch((err) => console.log('Failed to load app data:', err));
+            }
+            
             this.$emit("showToast", { message: `Welcome back ${data.name}!`, type: "success", timeout: 3000 });
             // Check if there's a redirect destination from query parameters
             const redirectTo = this.$route.query.destination;
