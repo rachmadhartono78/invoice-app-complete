@@ -2,15 +2,26 @@
     <div class="p-6">
         <div class="flex justify-between mb-6">
             <h1 class="text-2xl font-bold dark:text-white">Items & Services (Katalog)</h1>
-            <button
-                @click="$router.push('/app/invoices/items/create')"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                New Item
-            </button>
+            <div class="flex gap-2">
+                <button
+                    @click="showImportModal = true"
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded flex items-center gap-2"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    Import CSV
+                </button>
+                <button
+                    @click="$router.push('/app/invoices/items/create')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Item
+                </button>
+            </div>
         </div>
 
         <!-- Filters -->
@@ -129,19 +140,29 @@
                 </button>
             </div>
         </div>
+        </div>
+        
+        <ImportModal
+            :show="showImportModal"
+            @close="showImportModal = false"
+            @success="onImportSuccess"
+        />
     </div>
 </template>
 
 <script>
 import dashboardAxios from '@/api/dashboardAxios';
+import ImportModal from './ImportModal.vue';
 
 export default {
     name: 'ItemIndex',
+    components: { ImportModal },
     data() {
         return {
             items: [],
             categories: [],
             loading: false,
+            showImportModal: false,
             filters: {
                 search: '',
                 category_id: ''
@@ -217,6 +238,12 @@ export default {
                 this.pagination.current_page = page;
                 this.load();
             }
+        },
+        onImportSuccess() {
+            this.showImportModal = false;
+            this.$emit('showToast', 'Items imported successfully!', 'success');
+            this.load();
+            this.loadCategories(); // Reload categories in case valid new ones were created
         },
         formatCurrency(value) {
             return new Intl.NumberFormat('id-ID', {
