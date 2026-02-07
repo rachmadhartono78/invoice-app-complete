@@ -10,10 +10,11 @@ class InvoiceMenuSeeder extends Seeder
 {
     public function run(): void
     {
-        // Get or create Application
+        // Use existing 'Main Application' or create one without specific URL
+        // This avoids double nesting in the URL path
         $application = Application::firstOrCreate(
             ['name' => 'Main Application'],
-            ['url' => 'main']
+            []  // Let application URL be null/empty
         );
 
         // Create Parent Menu: Invoices (Dropdown)

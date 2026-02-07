@@ -1836,3 +1836,7 @@
 #29 C:/Users/BSI-5-2200049/Documents/vscode/invoice-app-complete/boilerplate-lara12-vue3vite-main/artisan(13): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
 #30 {main}
 "} 
+[2026-02-07 07:40:29] local.ERROR: Maximum execution time of 60 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 60 seconds exceeded at C:/Users/BSI-5-2200049/Documents/vscode/invoice-app-complete/boilerplate-lara12-vue3vite-main/vendor/laravel/framework/src/Illuminate/Foundation/Vite.php:12)
+[stacktrace]
+#0 {main}
+"} 

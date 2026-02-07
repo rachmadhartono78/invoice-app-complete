@@ -150,7 +150,7 @@
 </template>
 
 <script>
-import { dashboardAxios } from '@/axios';
+import dashboardAxios from '@/api/dashboardAxios';
 
 export default {
     name: 'QuotationIndex',

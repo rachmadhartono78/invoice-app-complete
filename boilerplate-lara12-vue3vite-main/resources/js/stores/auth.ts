@@ -31,12 +31,19 @@ export const useAuthStore = defineStore('auth', {
         getMenus: (state) => {
             if (!state.user?.authorities) return [];
             return state.user.authorities.flatMap(({ menus }) =>
-                menus.map(menu => ({
-                    ...menu,
-                    full_path: menu.menu_induk
-                        ? `/app/${menu.application.url}/${menu.menu_induk.url}/${menu.url}`
-                        : `/app/${menu.application.url}/${menu.url}`
-                }))
+                menus.map(menu => {
+                    // Build URL path dynamically, filtering out empty values
+                    const pathParts = [
+                        menu.application?.url,
+                        menu.menu_induk?.url,
+                        menu.url
+                    ].filter(p => p && p.trim());
+                    
+                    return {
+                        ...menu,
+                        full_path: `/app/${pathParts.join('/')}`
+                    };
+                })
             );
         },
 
@@ -71,19 +78,31 @@ export const useAuthStore = defineStore('auth', {
                         // Add child menu to the parent
                         const parentMenu = menuMap.get(parentName);
                         if (parentMenu && parentMenu.children) {
+                            // Build URL path dynamically, filtering out empty values
+                            const urlParts = [
+                                menu.application?.url,
+                                menu.menu_induk?.url,
+                                menu.url
+                            ].filter(p => p && p.trim());
+                            
                             parentMenu.children.push({
                                 name: menu.name,
-                                url: `/app/${menu.application.url}/${menu.menu_induk.url}/${menu.url}`,
-                                icon: menu.icon,
+                                url: `/app/${urlParts.join('/')}`,
                                 order: menu.order,
+                                icon: menu.icon,
                             });
                         }
                     } else {
                         // Directly add standalone root menus
                         if (!menuMap.has(menu.name)) {
+                            const urlParts = [
+                                menu.application?.url,
+                                menu.url
+                            ].filter(p => p && p.trim());
+                            
                             menuMap.set(menu.name, {
                                 name: menu.name,
-                                url: `/app/${menu.application.url}/${menu.url}`,
+                                url: `/app/${urlParts.join('/')}`,
                                 order: menu.order,
                                 menu_induk: null,
                                 icon: menu.icon,
