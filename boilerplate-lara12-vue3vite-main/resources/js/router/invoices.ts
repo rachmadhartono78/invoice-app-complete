@@ -95,6 +95,30 @@ const invoicesRoutes: RouteRecordRaw[] = [
                 },
                 component: () => import("@/components/pages/payments/Form.vue"),
             },
+            {
+                path: "items",
+                name: "items-index",
+                meta: {
+                    breadcrumb: "Produk & Layanan",
+                },
+                component: () => import("@/components/pages/items/Index.vue"),
+            },
+            {
+                path: "items/create",
+                name: "items-create",
+                meta: {
+                    breadcrumb: "Tambah Produk",
+                },
+                component: () => import("@/components/pages/items/Form.vue"),
+            },
+            {
+                path: "items/:id/edit",
+                name: "items-edit",
+                meta: {
+                    breadcrumb: "Edit Produk",
+                },
+                component: () => import("@/components/pages/items/Form.vue"),
+            },
         ],
     },
 ];
