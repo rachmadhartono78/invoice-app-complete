@@ -384,7 +384,8 @@ const getStatusClass = (status: string) => {
 const fetchStats = async () => {
     try {
         const res = await dashboardAxios.get('/dashboard/stats');
-        stats.value = res.data;
+        // dashboardAxios returns response.data directly via interceptor
+        stats.value = res;
     } catch (error) {
         console.error('Gagal mengambil data statistik:', error);
     }
@@ -395,20 +396,20 @@ const fetchSystemStats = async () => {
         const [usersRes, orgsRes, itemsRes] = await Promise.allSettled([
             dashboardAxios.get('/v1/master/user'),
             dashboardAxios.get('/v1/settings/organizations'),
-            dashboardAxios.get('/items?per_page=1'), // Just to get total
+            dashboardAxios.get('/items?per_page=1'),
         ]);
 
         if (usersRes.status === 'fulfilled') {
-            systemStats.value.users = usersRes.value?.data?.length || usersRes.value?.total || 0;
-            // Handle if it's wrapped in data.data
-            if (usersRes.value?.data?.data) systemStats.value.users = usersRes.value.data.total;
+            const data = usersRes.value as any;
+            systemStats.value.users = data?.total ?? (Array.isArray(data) ? data.length : (data?.data?.length ?? 0));
         }
         if (orgsRes.status === 'fulfilled') {
-            systemStats.value.organizations = orgsRes.value?.data?.length || orgsRes.value?.total || 0;
-            if (orgsRes.value?.data?.data) systemStats.value.organizations = orgsRes.value.data.total;
+            const data = orgsRes.value as any;
+            systemStats.value.organizations = data?.total ?? (Array.isArray(data) ? data.length : (data?.data?.length ?? 0));
         }
         if (itemsRes.status === 'fulfilled') {
-            systemStats.value.items = itemsRes.value?.data?.total || itemsRes.value?.total || 0;
+            const data = itemsRes.value as any;
+            systemStats.value.items = data?.total ?? (Array.isArray(data) ? data.length : (data?.data?.length ?? 0));
         }
     } catch (error) {
         console.error('Failed to fetch system stats:', error);
@@ -422,7 +423,8 @@ const downloadSummaryReport = async () => {
             responseType: 'blob'
         });
         
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+        // response is already response.data (the blob) due to axios interceptor
+        const url = window.URL.createObjectURL(new Blob([response as any]));
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', `Laporan_Ringkasan_Invoice_${new Date().toISOString().split('T')[0]}.pdf`);
