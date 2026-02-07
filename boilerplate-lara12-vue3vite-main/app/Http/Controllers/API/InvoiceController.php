@@ -7,7 +7,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller {
     public function index(Request $request) {
-        $query = Invoice::with('items');
+        // Eager load relationships to prevent N+1 queries
+        $query = Invoice::with('items', 'customer', 'payments');
         
         // Apply search filter
         if($request->search) {
