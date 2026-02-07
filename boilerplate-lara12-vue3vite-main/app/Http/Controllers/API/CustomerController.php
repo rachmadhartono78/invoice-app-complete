@@ -24,9 +24,9 @@ class CustomerController extends Controller
             });
         }
 
-        // Active filter
-        if ($request->has('is_active')) {
-            $query->where('is_active', $request->is_active);
+        // Active filter - only apply if not empty string
+        if ($request->has('is_active') && $request->is_active !== '' && $request->is_active !== null) {
+            $query->where('is_active', filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN));
         }
 
         return $query->orderBy('name')->paginate($request->per_page ?? 15);
