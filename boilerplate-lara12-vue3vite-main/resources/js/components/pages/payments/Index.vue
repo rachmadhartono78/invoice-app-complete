@@ -157,15 +157,15 @@ export default {
                     per_page: this.pagination.per_page,
                     ...this.filters
                 };
-                const { data } = await dashboardAxios.get('/payments', { params });
-                this.payments = data.data || [];
+                const response = await dashboardAxios.get('/payments', { params });
+                this.payments = response?.data || [];
                 this.pagination = {
-                    current_page: data.current_page || 1,
-                    last_page: data.last_page || 1,
-                    per_page: data.per_page || 15,
-                    total: data.total || 0,
-                    from: data.from || 0,
-                    to: data.to || 0
+                    current_page: response?.current_page || 1,
+                    last_page: response?.last_page || 1,
+                    per_page: response?.per_page || 15,
+                    total: response?.total || 0,
+                    from: response?.from || 0,
+                    to: response?.to || 0
                 };
             } catch (error) {
                 console.error('Failed to load payments:', error);

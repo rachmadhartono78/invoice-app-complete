@@ -54,7 +54,7 @@ class InvoiceController extends Controller {
             })
             ->values();
         
-        return response()->json(['data' => $invoices]);
+        return response()->json($invoices);
     }
     
     public function store(Request $request) {

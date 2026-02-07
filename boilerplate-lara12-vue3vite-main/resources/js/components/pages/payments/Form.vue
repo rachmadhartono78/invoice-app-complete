@@ -4,7 +4,42 @@
             <h1 class="text-2xl font-bold dark:text-white">{{ isEdit ? 'Edit Payment' : 'Record Payment' }}</h1>
         </div>
 
-        <form @submit.prevent="submit" class="bg-white dark:bg-gray-800 rounded shadow p-6">
+        <!-- Loading State -->
+        <div v-if="loading && !isEdit && !unpaidInvoices.length" class="bg-white dark:bg-gray-800 rounded shadow p-6">
+            <div class="text-center py-8">
+                <div class="text-gray-500 dark:text-gray-400">Loading invoices...</div>
+            </div>
+        </div>
+
+        <!-- No Unpaid Invoices Message -->
+        <div v-else-if="!isEdit && !unpaidInvoices.length && !loading" class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded shadow p-6">
+            <div class="flex items-start gap-4">
+                <div class="text-4xl flex-shrink-0">📝</div>
+                <div class="flex-1">
+                    <h2 class="text-lg font-bold text-yellow-800 dark:text-yellow-400 mb-2">Tidak Ada Invoice untuk Dibayar</h2>
+                    <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
+                        Semua invoice sudah terbayar lunas atau tidak ada invoice yang dalam status pending pembayaran. Silahkan periksa kembali status invoice Anda.
+                    </p>
+                    <div class="flex gap-3">
+                        <button
+                            @click="$router.push({ name: 'invoices-index' })"
+                            class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors"
+                        >
+                            Lihat Daftar Invoice
+                        </button>
+                        <button
+                            @click="$router.push({ name: 'payments-index' })"
+                            class="bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded text-sm font-semibold transition-colors"
+                        >
+                            Kembali
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Form -->
+        <form v-if="isEdit || (unpaidInvoices.length > 0)" @submit.prevent="submit" class="bg-white dark:bg-gray-800 rounded shadow p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Invoice Selection -->
                 <div class="md:col-span-2">
@@ -151,8 +186,8 @@ export default {
     methods: {
         async loadUnpaidInvoices() {
             try {
-                const { data } = await dashboardAxios.get('/invoices/unpaid');
-                this.unpaidInvoices = data.data || [];
+                const invoices = await dashboardAxios.get('/invoices/unpaid');
+                this.unpaidInvoices = invoices || [];
                 console.log('Loaded unpaid invoices:', this.unpaidInvoices.length);
             } catch (error) {
                 console.error('Failed to load invoices:', error);
