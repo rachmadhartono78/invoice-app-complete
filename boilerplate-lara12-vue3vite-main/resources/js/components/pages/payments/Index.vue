@@ -3,7 +3,7 @@
         <div class="flex justify-between mb-6">
             <h1 class="text-2xl font-bold dark:text-white">Payments</h1>
             <button
-                @click="$router.push('/app/invoices/payments/create')"
+                @click="$router.push({ name: 'payments-create' })"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,14 +69,14 @@
                         <td class="p-3">
                             <div class="flex gap-2 justify-center">
                                 <button
-                                    @click="$router.push(`/app/invoices/payments/${payment.id}`)"
+                                    @click="$router.push({ name: 'payments-edit', params: { id: payment.id } })"
                                     class="text-blue-600 dark:text-blue-400"
                                     title="View"
                                 >
                                     👁
                                 </button>
                                 <button
-                                    @click="$router.push(`/app/invoices/payments/${payment.id}/edit`)"
+                                    @click="$router.push({ name: 'payments-edit', params: { id: payment.id } })"
                                     class="text-green-600 dark:text-green-400"
                                     title="Edit"
                                 >

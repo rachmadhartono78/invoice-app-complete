@@ -106,7 +106,7 @@
                 </button>
                 <button
                     type="button"
-                    @click="$router.push('/app/invoices/payments')"
+                    @click="$router.push({ name: 'payments-index' })"
                     class="bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 px-6 py-2 rounded dark:text-white"
                 >
                     Cancel
@@ -181,7 +181,7 @@ export default {
             } catch (error) {
                 console.error('Failed to load payment:', error);
                 this.$emit('showToast', 'Failed to load payment', 'error');
-                this.$router.push('/app/invoices/payments');
+                this.$router.push({ name: 'payments-index' });
             } finally {
                 this.loading = false;
             }
@@ -205,7 +205,7 @@ export default {
                     await dashboardAxios.post('/payments', this.form);
                     this.$emit('showToast', '✅ Payment recorded successfully', 'success');
                 }
-                this.$router.push('/app/invoices/payments');
+                this.$router.push({ name: 'payments-index' });
             } catch (error) {
                 const msg = error.response?.data?.message || 'Failed to save payment';
                 this.$emit('showToast', msg, 'error');
