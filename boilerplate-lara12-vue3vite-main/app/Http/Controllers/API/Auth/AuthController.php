@@ -45,20 +45,13 @@ class AuthController extends Controller
                     $data = null;
                 } else {
                     $token = $data->createToken($request->device_name)->plainTextToken;
-                    
-                    // Return minimal data for fast login (load app data separately)
+                    // Load authorities with optimized query (reduced nested relationships)
+                    $this->getDataApplications($data);
+
                     $status = 200;
                     $result = true;
                     $message = 'Login sukses';
-                    
-                    // Only return essential user info + token
-                    $data = [
-                        'id' => $data->id,
-                        'name' => $data->name,
-                        'email' => $data->email,
-                        'avatar' => $data->avatar,
-                        'token' => $token,
-                    ];
+                    $data['token'] = $token;
                 }
             } catch (\Throwable $th) {
                 Log::error([
@@ -87,19 +80,13 @@ class AuthController extends Controller
                 if ($user && Hash::check($credentials['password'], $user->password)) {
                     try {
                         $token = $user->createToken($request->device_name)->plainTextToken;
+                        $this->getDataApplications($user);
 
                         $status = 200;
                         $result = true;
                         $message = 'Login sukses';
-                        
-                        // Return minimal data for fast login
-                        $data = [
-                            'id' => $user->id,
-                            'name' => $user->name,
-                            'email' => $user->email,
-                            'avatar' => $user->avatar,
-                            'token' => $token,
-                        ];
+                        $user['token'] = $token;
+                        $data = $user;
                     } catch (\Throwable $th) {
                         Log::error([
                             'error' => [
@@ -329,7 +316,7 @@ class AuthController extends Controller
                     // $user->load('roles');
                     // Auth::login($user);
                     $user['token'] = $user->createToken($request->device_name)->plainTextToken;
-                    // Removed heavy eager loading for faster login
+                    $this->getDataApplications($user);
                     $message = 'Berhasil masuk';
                     $status = 200;
                 } else {
@@ -347,7 +334,7 @@ class AuthController extends Controller
                     ]); 
                     $user['token'] = $user->createToken($request->device_name)->plainTextToken;
                     DB::commit();
-                    // Removed heavy eager loading for faster registration
+                    $this->getDataApplications($user);
                     $message = 'Berhasil mendaftar';
                     $status = 201;
                 }
@@ -527,7 +514,7 @@ class AuthController extends Controller
         // Generate token Sanctum
         $token = $data->createToken('otp wa'.$request->device_name)->plainTextToken;
         $data['token'] = $token;
-        // Removed heavy eager loading for faster login
+        $this->getDataApplications($data);
 
         return response()->json([
             'message' => 'Login berhasil',
@@ -715,7 +702,7 @@ class AuthController extends Controller
             }
             $user->update($dataToUpdate);
             $user['token'] = $user->createToken('yahoo')->plainTextToken;
-            // Removed heavy eager loading for faster login
+            $this->getDataApplications($user);
             $message = 'Berhasil masuk';
             $status = 200;
         } else {
@@ -735,7 +722,7 @@ class AuthController extends Controller
                     ]); 
 
             DB::commit();
-            // Removed heavy eager loading for faster registration
+            $this->getDataApplications($user);
             $message = 'Berhasil mendaftar';
             $status = 201;
         }
