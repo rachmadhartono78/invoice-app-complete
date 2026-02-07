@@ -14,6 +14,8 @@ use App\Http\Middleware\LogApiRequests;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\ItemController;
+use App\Http\Controllers\API\CustomerController;
+use App\Http\Controllers\API\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -131,5 +133,22 @@ Route::middleware(['auth:sanctum', LogApiRequests::class])->group(function () {
             Route::get('/{item}',[ItemController::class,'show']);
             Route::put('/{item}',[ItemController::class,'update']);
             Route::delete('/{item}',[ItemController::class,'destroy']);
+        });
+
+        Route::prefix('customers')->group(function(){
+            Route::get('/',[CustomerController::class,'index']);
+            Route::post('/',[CustomerController::class,'store']);
+            Route::get('/{customer}',[CustomerController::class,'show']);
+            Route::put('/{customer}',[CustomerController::class,'update']);
+            Route::delete('/{customer}',[CustomerController::class,'destroy']);
+        });
+
+        Route::prefix('payments')->group(function(){
+            Route::get('/',[PaymentController::class,'index']);
+            Route::get('/next-number',[PaymentController::class,'nextPaymentNumber']);
+            Route::post('/',[PaymentController::class,'store']);
+            Route::get('/{payment}',[PaymentController::class,'show']);
+            Route::put('/{payment}',[PaymentController::class,'update']);
+            Route::delete('/{payment}',[PaymentController::class,'destroy']);
         });
 });
