@@ -93,29 +93,40 @@
                     />
                 </div>
             </div>
+            <!-- Items Section -->
             <div>
-                <h3 class="font-bold mb-2">Items <span class="text-red-600 font-bold">*</span> (At least 1 item required)</h3>
+                <div class="flex justify-between items-end mb-2">
+                    <h3 class="font-bold">Items <span class="text-red-600 font-bold">*</span> (At least 1 item required)</h3>
+                    <button 
+                        type="button" 
+                        @click="showItemSelector = true"
+                        class="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 flex items-center gap-1"
+                    >
+                        <span>📚</span> Ambil dari Katalog (Batch)
+                    </button>
+                </div>
                 <div v-if="errors.items" class="mb-2 p-3 bg-red-50 border border-red-600 rounded text-red-700 text-sm">
                     ⚠️ {{ errors.items }}
                 </div>
+                <!-- Group Items by Area in Display? Or just flat list with Area column? 
+                     For now, flat list with Area column is easier to implement in Form. 
+                     PDF will handle grouping. -->
                 <div
                     v-for="(it, i) in f.items"
                     :key="i"
-                    class="grid grid-cols-7 gap-2 mb-2 items-end"
+                    class="grid grid-cols-8 gap-2 mb-2 items-end"
                 >
-                    <div class="relative">
+                    <div class="col-span-2 relative">
                         <label class="block text-xs">Select Item <span class="text-red-600 font-bold">*</span></label>
                         <input
                             v-model="itemSearch[i]"
                             type="text"
                             placeholder="Search item..."
                             @focus="itemSearch[i] = itemSearch[i] || ''"
-                            :class="[
-                                'border px-2 py-1 rounded w-full text-sm',
-                                !it.item_id && Object.keys(errors).length > 0 ? 'border-red-600 bg-red-50' : 'border-gray-300'
-                            ]"
+                            class="border px-2 py-1 rounded w-full text-sm"
+                            :class="!it.item_id && Object.keys(errors).length > 0 ? 'border-red-600 bg-red-50' : 'border-gray-300'"
                         />
-                        <!-- Dropdown hasil search -->
+                        <!-- Search Dropdown Logic (Existing) -->
                         <div v-if="itemSearch[i] && getFilteredItems(i).length > 0"
                             class="absolute top-full left-0 right-0 mt-1 border border-gray-300 bg-white rounded z-10 max-h-48 overflow-y-auto shadow-lg">
                             <div v-for="item in getFilteredItems(i)"
@@ -127,79 +138,54 @@
                             </div>
 
                         </div>
-                        <!-- Pesan jika tidak ada hasil search -->
-                        <div v-if="itemSearch[i] && getFilteredItems(i).length === 0"
-                            class="absolute top-full left-0 right-0 mt-1 border border-gray-300 bg-white rounded z-10 px-2 py-2 text-xs text-gray-500 shadow-lg">
-                            No items found
-                        </div>
-                        <!-- Display selected item -->
-                        <div v-if="it.item_id" class="text-xs text-blue-600 mt-1">
-                            ✓ {{ it.item_name }}
-                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs">Code</label
-                        ><input
+                        <label class="block text-xs">Area</label>
+                        <input
+                            v-model="it.area"
+                            class="border border-gray-300 px-2 py-1 rounded w-full text-sm bg-gray-50"
+                            placeholder="Area"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-xs">Code</label>
+                        <input
                             v-model="it.item_code"
                             class="border border-gray-300 px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
+                    <!-- Reuse existing fields -->
                     <div>
-                        <label class="block text-xs">Name</label
-                        ><input
-                            v-model="it.item_name"
-                            class="border border-gray-300 px-2 py-1 rounded w-full text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-xs">Qty <span class="text-red-600 font-bold">*</span></label
-                        ><input
+                        <label class="block text-xs">Qty <span class="text-red-600 font-bold">*</span></label>
+                        <input
                             v-model.number="it.quantity"
                             type="number"
                             required
-                            :class="[
-                                'border px-2 py-1 rounded w-full text-sm',
-                                !it.quantity && Object.keys(errors).length > 0 ? 'border-red-600 bg-red-50' : 'border-gray-300'
-                            ]"
+                            class="border px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-xs">Price <span class="text-red-600 font-bold">*</span></label
-                        ><input
+                        <label class="block text-xs">Price <span class="text-red-600 font-bold">*</span></label>
+                        <input
                             v-model.number="it.unit_price"
                             type="number"
                             required
-                            :class="[
-                                'border px-2 py-1 rounded w-full text-sm',
-                                !it.unit_price && Object.keys(errors).length > 0 ? 'border-red-600 bg-red-50' : 'border-gray-300'
-                            ]"
+                            class="border px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
                     <div>
-                        <label class="block text-xs">Disc</label
-                        ><input
+                        <label class="block text-xs">Disc</label>
+                        <input
                             v-model.number="it.discount"
                             type="number"
                             class="border border-gray-300 px-2 py-1 rounded w-full text-sm"
                         />
                     </div>
                     <div class="flex gap-1">
-                        <span
-                            class="border border-gray-300 px-2 py-1 rounded bg-gray-100 text-sm flex-1"
-                            >{{
-                                fmt(
-                                    (it.quantity || 0) * (it.unit_price || 0) -
-                                        (it.discount || 0),
-                                )
-                            }}</span
-                        >
-                        <button
-                            type="button"
-                            @click="deleteItem(i)"
-                            class="text-red-600 hover:text-red-800"
-                        >
-                            🗑
-                        </button>
+                        <span class="border border-gray-300 px-2 py-1 rounded bg-gray-100 text-sm flex-1">
+                            {{ fmt((it.quantity || 0) * (it.unit_price || 0) - (it.discount || 0)) }}
+                        </span>
+                        <button type="button" @click="deleteItem(i)" class="text-red-600 hover:text-red-800">🗑</button>
                     </div>
                 </div>
                 <button
@@ -207,9 +193,17 @@
                     @click="addNewItem"
                     class="text-blue-600 text-sm hover:text-blue-800"
                 >
-                    + Add Item
+                    + Add Single Item
                 </button>
             </div>
+            
+            <InternalItemSelector 
+                :show="showItemSelector" 
+                :items="masterItems"
+                @close="showItemSelector = false"
+                @confirm="handleItemsSelected"
+            />
+
             <div class="grid grid-cols-3 gap-4">
                 <div>
                     <label class="block mb-1">Discount</label
@@ -281,11 +275,13 @@
 import { ref, computed, onMounted, watch, reactive } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from '../../../api/dashboardAxios';
+import InternalItemSelector from './InternalItemSelector.vue';
 const route = useRoute();
 const router = useRouter();
 const id = route.params.id;
 const nextInvoiceNumber = ref(null);
 const masterItems = ref([]); // Master items list for dropdown
+const showItemSelector = ref(false);
 const errors = ref({});
 const itemSearch = reactive({}); // Track search for each item row - using reactive for proper reactivity
 
@@ -310,6 +306,7 @@ const f = ref({
             item_id: null,
             item_code: "",
             item_name: "",
+            area: "",
             quantity: 1,
             unit_price: 0,
             discount: 0,
@@ -473,6 +470,7 @@ const selectItem = (index, event) => {
         f.value.items[index].item_id = selectedMasterItem.id;
         f.value.items[index].item_code = selectedMasterItem.code || '';
         f.value.items[index].item_name = selectedMasterItem.name;
+        f.value.items[index].area = selectedMasterItem.category?.name || '';
         f.value.items[index].unit_price = selectedMasterItem.price || 0;
         // Keep quantity as is (user should set this)
         if (f.value.items[index].quantity === 1) {
@@ -495,6 +493,7 @@ const selectItemFromSearch = (index, item) => {
     f.value.items[index].item_id = item.id;
     f.value.items[index].item_code = item.code || '';
     f.value.items[index].item_name = item.name;
+    f.value.items[index].area = item.category?.name || '';
     f.value.items[index].unit_price = item.price || 0;
     
     // Keep quantity as is (user should set this)
@@ -512,11 +511,26 @@ const addNewItem = () => {
         item_id: null,
         item_code: '',
         item_name: '',
+        area: '',
         quantity: 1,
         unit_price: 0,
         discount: 0,
     });
     itemSearch[newIndex] = ''; // Initialize search for new item
+};
+
+const handleItemsSelected = (selectedItems) => {
+    // Check if we have an empty first item that hasn't been used, if so replace it
+    if (f.value.items.length === 1 && !f.value.items[0].item_id && !f.value.items[0].item_name) {
+        f.value.items = [];
+    }
+    
+    // Append new items
+    selectedItems.forEach(item => {
+        f.value.items.push(item);
+    });
+    
+    showItemSelector.value = false;
 };
 
 const deleteItem = (index) => {
@@ -549,7 +563,7 @@ const formatDateForInput = (dateStr) => {
 onMounted(async () => {
     // Load master items
     try {
-        const response = await axios.get('items?per_page=100');
+        const response = await axios.get('items?per_page=500');
         // Handle both paginated and array responses
         masterItems.value = Array.isArray(response.data) ? response.data : response.data.data || response.data;
     } catch (e) {

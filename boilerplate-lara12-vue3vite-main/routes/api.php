@@ -127,6 +127,7 @@ Route::middleware(['auth:sanctum', LogApiRequests::class])->group(function () {
         });
 
         Route::prefix('items')->group(function(){
+            Route::post('/import', [\App\Http\Controllers\API\ImportController::class, 'items']);
             Route::get('/',[ItemController::class,'index']);
             Route::get('/categories',[ItemController::class,'categories']);
             Route::post('/',[ItemController::class,'store']);

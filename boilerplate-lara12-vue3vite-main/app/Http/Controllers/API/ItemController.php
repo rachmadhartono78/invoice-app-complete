@@ -10,13 +10,18 @@ class ItemController {
      * List all active items with optional filtering
      */
     public function index(Request $request) {
-        $query = Item::active()->with('category');
+        // Select only necessary columns to reduce payload
+        $query = Item::select('id', 'category_id', 'code', 'name', 'unit', 'price', 'quantity', 'is_active', 'description')
+                     ->active()
+                     ->with(['category:id,name']); // Only load category id and name
 
         // Search by name
         if ($request->has('search') && $request->search) {
             $search = $request->search;
-            $query->where('name', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
                   ->orWhere('code', 'like', "%{$search}%");
+            });
         }
 
         // Filter by category

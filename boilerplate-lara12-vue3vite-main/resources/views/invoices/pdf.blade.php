@@ -300,15 +300,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($invoice->items as $item)
-                <tr>
-                    <td class="kode">{{ $item->item_code }}</td>
-                    <td class="nama">{{ $item->item_name }}</td>
-                    <td class="qty">{{ number_format($item->quantity) }}</td>
-                    <td class="harga">{{ number_format($item->unit_price, 0, '.', ',') }}</td>
-                    <td class="diskon">{{ number_format($item->discount, 0, '.', ',') }}</td>
-                    <td class="total">{{ number_format($item->total, 0, '.', ',') }}</td>
-                </tr>
+                @foreach($invoice->items->groupBy('area') as $area => $items)
+                    @if($area)
+                    <tr style="background-color: #f0f0f0;">
+                        <td colspan="6" style="font-weight: bold; padding: 8px 10px; border: 1px solid #000; text-transform: uppercase;">{{ $area }}</td>
+                    </tr>
+                    @endif
+                    @foreach($items as $item)
+                    <tr>
+                        <td class="kode">{{ $item->item_code }}</td>
+                        <td class="nama">{{ $item->item_name }}</td>
+                        <td class="qty">{{ number_format($item->quantity) }}</td>
+                        <td class="harga">{{ number_format($item->unit_price, 0, '.', ',') }}</td>
+                        <td class="diskon">{{ number_format($item->discount, 0, '.', ',') }}</td>
+                        <td class="total">{{ number_format($item->total, 0, '.', ',') }}</td>
+                    </tr>
+                    @endforeach
                 @endforeach
             </tbody>
         </table>

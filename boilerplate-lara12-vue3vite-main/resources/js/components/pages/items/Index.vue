@@ -1,7 +1,7 @@
 <template>
     <div class="p-6">
         <div class="flex justify-between mb-6">
-            <h1 class="text-2xl font-bold dark:text-white">Items & Services</h1>
+            <h1 class="text-2xl font-bold dark:text-white">Items & Services (Katalog)</h1>
             <button
                 @click="$router.push('/app/invoices/items/create')"
                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
@@ -14,17 +14,17 @@
         </div>
 
         <!-- Filters -->
-        <div class="flex gap-4 mb-4">
+        <div class="flex gap-4 mb-4 sticky top-0 bg-gray-50 dark:bg-gray-900 z-20 py-2">
             <input
                 v-model="filters.search"
                 @input="load"
                 placeholder="Search by name or code..."
-                class="border dark:border-gray-600 px-3 py-2 rounded flex-1 dark:bg-gray-700 dark:text-white"
+                class="border dark:border-gray-600 px-3 py-2 rounded flex-1 dark:bg-gray-700 dark:text-white shadow-sm"
             />
             <select
                 v-model="filters.category_id"
                 @change="load"
-                class="border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
+                class="border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white shadow-sm"
             >
                 <option value="">All Categories</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
@@ -33,91 +33,97 @@
             </select>
         </div>
 
-        <!-- Table -->
-        <div class="bg-white dark:bg-gray-800 rounded shadow overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-100 dark:bg-gray-700">
-                    <tr>
-                        <th class="p-3 text-left dark:text-gray-200">Code</th>
-                        <th class="p-3 text-left dark:text-gray-200">Name</th>
-                        <th class="p-3 text-left dark:text-gray-200">Category</th>
-                        <th class="p-3 text-left dark:text-gray-200">Unit</th>
-                        <th class="p-3 text-right dark:text-gray-200">Price</th>
-                        <th class="p-3 text-right dark:text-gray-200">Stock</th>
-                        <th class="p-3 text-center dark:text-gray-200">Status</th>
-                        <th class="p-3 text-center dark:text-gray-200">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="loading" class="border-t dark:border-gray-700">
-                        <td colspan="8" class="p-4 text-center dark:text-gray-300">Loading...</td>
-                    </tr>
-                    <tr v-else-if="!items.length" class="border-t dark:border-gray-700">
-                        <td colspan="8" class="p-4 text-center text-gray-500 dark:text-gray-400">No items found</td>
-                    </tr>
-                    <tr
-                        v-else
-                        v-for="item in items"
-                        :key="item.id"
-                        class="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+        <!-- Loading State -->
+        <div v-if="loading" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p class="mt-2 text-gray-500">Loading items...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="!items.length" class="text-center py-12 bg-white dark:bg-gray-800 rounded shadow">
+            <p class="text-gray-500 dark:text-gray-400">No items found matching your criteria.</p>
+        </div>
+
+        <!-- Grouped Grid View -->
+        <div v-else>
+            <div v-for="(groupItems, area) in groupedItems" :key="area" class="mb-8">
+                <h3 class="font-bold text-lg text-gray-700 dark:text-gray-200 border-b pb-2 mb-4 sticky top-14 bg-gray-50 dark:bg-gray-900 z-10 flex items-center gap-2">
+                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{ groupItems.length }}</span>
+                    {{ area || 'Uncategorized' }}
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div 
+                        v-for="item in groupItems" 
+                        :key="item.id" 
+                        class="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow relative group"
                     >
-                        <td class="p-3 dark:text-gray-300">{{ item.code || '-' }}</td>
-                        <td class="p-3 dark:text-gray-300">
-                            <div class="font-medium">{{ item.name }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400 truncate max-w-xs">{{ item.description }}</div>
-                        </td>
-                        <td class="p-3 dark:text-gray-300">{{ item.category ? item.category.name : '-' }}</td>
-                        <td class="p-3 dark:text-gray-300">{{ item.unit }}</td>
-                        <td class="p-3 text-right dark:text-gray-300">{{ formatCurrency(item.price) }}</td>
-                        <td class="p-3 text-right dark:text-gray-300">{{ item.quantity }}</td>
-                        <td class="p-3 text-center">
+                        <!-- Status Badge -->
+                        <div class="absolute top-3 right-3">
                             <span
-                                :class="item.is_active ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
-                                class="px-2 py-1 rounded text-xs"
+                                :class="item.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
+                                class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider"
                             >
                                 {{ item.is_active ? 'Active' : 'Inactive' }}
                             </span>
-                        </td>
-                        <td class="p-3">
-                            <div class="flex gap-2 justify-center">
+                        </div>
+
+                        <div class="font-bold text-gray-800 dark:text-white pr-16 mb-1">{{ item.name }}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2 font-mono bg-gray-50 dark:bg-gray-700 inline-block px-1 rounded">
+                            {{ item.code || 'NO-CODE' }}
+                        </div>
+                        
+                        <div class="flex justify-between items-end mt-4">
+                            <div>
+                                <div class="text-xs text-gray-500">Price</div>
+                                <div class="font-bold text-blue-600 dark:text-blue-400">
+                                    {{ formatCurrency(item.price) }}
+                                </div>
+                                <div class="text-[10px] text-gray-400">per {{ item.unit }}</div>
+                            </div>
+                            
+                            <div class="flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     @click="$router.push(`/app/invoices/items/${item.id}/edit`)"
-                                    class="text-green-600 dark:text-green-400 hover:text-green-800"
+                                    class="p-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
                                     title="Edit"
                                 >
                                     ✏️
                                 </button>
                                 <button
                                     @click="confirmDelete(item)"
-                                    class="text-red-600 dark:text-red-400 hover:text-red-800"
-                                    title="Deactivate"
+                                    class="p-2 bg-red-50 text-red-600 rounded hover:bg-red-100"
+                                    title="Delete"
                                 >
                                     🗑
                                 </button>
                             </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Pagination -->
-        <div v-if="pagination.total > 0" class="mt-4 flex justify-between items-center dark:text-gray-300">
-            <div>
+        <div v-if="pagination.total > 0 && !loading" class="mt-8 flex justify-between items-center bg-white dark:bg-gray-800 p-4 rounded shadow">
+            <div class="text-sm text-gray-600 dark:text-gray-300">
                 Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} entries
             </div>
             <div class="flex gap-2">
                 <button
                     @click="changePage(pagination.current_page - 1)"
                     :disabled="pagination.current_page === 1"
-                    class="px-3 py-1 border dark:border-gray-600 rounded disabled:opacity-50 dark:bg-gray-700"
+                    class="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                     Previous
                 </button>
+                <div class="px-3 py-1 bg-blue-50 text-blue-600 rounded font-bold">
+                    {{ pagination.current_page }}
+                </div>
                 <button
                     @click="changePage(pagination.current_page + 1)"
                     :disabled="pagination.current_page === pagination.last_page"
-                    class="px-3 py-1 border dark:border-gray-600 rounded disabled:opacity-50 dark:bg-gray-700"
+                    class="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                     Next
                 </button>
@@ -154,6 +160,24 @@ export default {
         this.loadCategories();
         this.load();
     },
+    computed: {
+        groupedItems() {
+            const groups = {};
+            this.items.forEach(item => {
+                const area = item.category ? item.category.name : 'Uncategorized';
+                if (!groups[area]) groups[area] = [];
+                groups[area].push(item);
+            });
+            // Optional: Sort keys
+            return Object.keys(groups).sort().reduce(
+                (obj, key) => { 
+                    obj[key] = groups[key]; 
+                    return obj;
+                }, 
+                {}
+            );
+        }
+    },
     methods: {
         async loadCategories() {
             try {
@@ -168,7 +192,7 @@ export default {
             try {
                 const params = {
                     page: this.pagination.current_page,
-                    per_page: this.pagination.per_page,
+                    per_page: 60, // Optimized: 60 items is a good balance for grid view
                     ...this.filters
                 };
                 const { data } = await dashboardAxios.get('/items', { params });
