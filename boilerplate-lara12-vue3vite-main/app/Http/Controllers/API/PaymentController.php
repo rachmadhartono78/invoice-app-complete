@@ -28,15 +28,15 @@ class PaymentController extends Controller
         }
 
         // Filter by invoice
-        if ($request->has('invoice_id')) {
+        if ($request->has('invoice_id') && $request->invoice_id !== '' && $request->invoice_id !== null) {
             $query->where('invoice_id', $request->invoice_id);
         }
 
         // Filter by date range
-        if ($request->has('date_from')) {
+        if ($request->has('date_from') && $request->date_from !== '' && $request->date_from !== null) {
             $query->whereDate('payment_date', '>=', $request->date_from);
         }
-        if ($request->has('date_to')) {
+        if ($request->has('date_to') && $request->date_to !== '' && $request->date_to !== null) {
             $query->whereDate('payment_date', '<=', $request->date_to);
         }
 
