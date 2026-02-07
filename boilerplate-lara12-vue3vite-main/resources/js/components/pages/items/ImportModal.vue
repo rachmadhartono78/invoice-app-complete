@@ -101,13 +101,15 @@ const upload = async () => {
     formData.append('file', file.value);
 
     try {
-        const response = await axios.post('/items/import', formData, {
+        // dashboardAxios interceptor returns response.data directly
+        const result = await axios.post('/items/import', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }
         });
 
-        message.value = response.data.message;
+        // result is already the response data (due to interceptor)
+        message.value = result.message || `Berhasil import ${result.count || 0} item!`;
         isError.value = false;
         
         setTimeout(() => {
@@ -116,8 +118,12 @@ const upload = async () => {
         }, 1500);
 
     } catch (e) {
-        console.error(e);
-        message.value = e.response?.data?.message || 'Import failed.';
+        console.error('Import error:', e);
+        // Check if error response exists and has a message
+        const errorMessage = e.response?.data?.message 
+            || e.message 
+            || 'Import gagal. Silakan cek format file CSV.';
+        message.value = errorMessage;
         isError.value = true;
     } finally {
         uploading.value = false;

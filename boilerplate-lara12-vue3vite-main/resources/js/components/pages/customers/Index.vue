@@ -168,18 +168,20 @@ export default {
                     per_page: this.pagination.per_page,
                     ...this.filters
                 };
-                const { data } = await dashboardAxios.get('/customers', { params });
-                this.customers = data.data;
+                // dashboardAxios interceptor returns response.data directly
+                const response = await dashboardAxios.get('/customers', { params });
+                this.customers = response?.data || [];
                 this.pagination = {
-                    current_page: data.current_page,
-                    last_page: data.last_page,
-                    per_page: data.per_page,
-                    total: data.total,
-                    from: data.from,
-                    to: data.to
+                    current_page: response?.current_page || 1,
+                    last_page: response?.last_page || 1,
+                    per_page: response?.per_page || 15,
+                    total: response?.total || 0,
+                    from: response?.from || 0,
+                    to: response?.to || 0
                 };
             } catch (error) {
                 console.error('Failed to load customers:', error);
+                this.customers = [];
                 this.$emit('showToast', 'Failed to load customers', 'error');
             } finally {
                 this.loading = false;

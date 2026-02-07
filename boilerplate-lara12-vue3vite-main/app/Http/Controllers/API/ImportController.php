@@ -26,6 +26,8 @@ class ImportController extends Controller
         $handle = fopen($path, 'r');
         $currentCategory = null;
         $count = 0;
+        $created = 0;
+        $updated = 0;
         $skipped = 0;
         $errors = [];
 
@@ -69,30 +71,37 @@ class ImportController extends Controller
                     // Parse Price
                     $price = (float) str_replace(['Rp', '.', ' '], '', $priceStr);
                     
-                    // Parse Qty (default to 1 if empty or bonus, seeding used 0 but 1 makes more sense for active items?)
-                    // Seeder used: $qty = (int) $qtyStr;
+                    // Parse Qty
                     $qty = (int) $qtyStr; 
 
-                    // Create or Update Item based on Name (to avoid duplicates)
-                    Item::updateOrCreate(
-                        ['name' => $name],
-                        [
+                    // Check if item already exists
+                    $existingItem = Item::where('name', $name)->first();
+                    
+                    if ($existingItem) {
+                        // Update existing item
+                        $existingItem->update([
                             'category_id' => $currentCategory->id,
                             'unit' => 'pcs',
                             'quantity' => $qty,
                             'price' => $price,
-                            'area' => $dimension, // Save dimension into area field
+                            'area' => $dimension,
                             'is_active' => true,
-                            // Generate code if not exists. Since updateOrCreate checks name, we might keep existing code.
-                            // But if new, we need a code. We can use a boot event or logic here.
-                            // Let's generate if it's a new record (was recently created doesn't exist in updateOrCreate easily without checking existence first)
-                            // Simpler: Just generate a candidate code. If it exists, we might have collision if we don't check.
-                            // For simplicity matching the Seeder logic:
-                            'code' => strtoupper(substr($currentCategory->slug, 0, 3)) . '-' . rand(1000, 9999) 
-                            // Note: Random code on UPDATE might change the code for existing items.
-                            // Ideally we should check if item exists first.
-                        ]
-                    );
+                        ]);
+                        $updated++;
+                    } else {
+                        // Create new item
+                        Item::create([
+                            'name' => $name,
+                            'category_id' => $currentCategory->id,
+                            'unit' => 'pcs',
+                            'quantity' => $qty,
+                            'price' => $price,
+                            'area' => $dimension,
+                            'is_active' => true,
+                            'code' => strtoupper(substr($currentCategory->slug, 0, 3)) . '-' . rand(1000, 9999)
+                        ]);
+                        $created++;
+                    }
                     $count++;
                 }
             }
@@ -100,9 +109,21 @@ class ImportController extends Controller
             DB::commit();
             fclose($handle);
 
+            // Build informative message
+            $messageParts = [];
+            if ($created > 0) $messageParts[] = "$created item baru ditambahkan";
+            if ($updated > 0) $messageParts[] = "$updated item diperbarui";
+            if ($skipped > 0) $messageParts[] = "$skipped item dilewati";
+            
+            $message = count($messageParts) > 0 
+                ? "Import berhasil! " . implode(', ', $messageParts) . "."
+                : "Tidak ada data yang diproses.";
+
             return response()->json([
-                'message' => "Import successful! Processed $count items.",
+                'message' => $message,
                 'count' => $count,
+                'created' => $created,
+                'updated' => $updated,
                 'skipped' => $skipped
             ]);
 
