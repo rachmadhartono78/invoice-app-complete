@@ -35,7 +35,7 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'code' => 'required|unique:customers,code',
+            'code' => 'nullable|unique:customers,code',
             'name' => 'required|max:255',
             'address' => 'nullable',
             'phone' => 'nullable|max:20',
@@ -67,7 +67,7 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $validated = $request->validate([
-            'code' => ['required', Rule::unique('customers')->ignore($customer->id)],
+            'code' => ['nullable', Rule::unique('customers')->ignore($customer->id)],
             'name' => 'required|max:255',
             'address' => 'nullable',
             'phone' => 'nullable|max:20',

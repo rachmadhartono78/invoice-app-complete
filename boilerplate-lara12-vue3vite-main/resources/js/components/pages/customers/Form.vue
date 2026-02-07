@@ -8,13 +8,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Code -->
                 <div>
-                    <label class="block mb-2 font-medium dark:text-gray-200">Customer Code <span class="text-red-500">*</span></label>
+                    <label class="block mb-2 font-medium dark:text-gray-200">Customer Code <span class="text-gray-400 text-sm">(Auto-generated if empty)</span></label>
                     <input
                         v-model="form.code"
                         type="text"
-                        required
                         class="w-full border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
-                        placeholder="CUST001"
+                        placeholder="Leave empty to auto-generate"
                     />
                 </div>
 
