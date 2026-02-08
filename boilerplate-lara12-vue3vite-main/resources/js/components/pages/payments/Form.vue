@@ -187,8 +187,8 @@ export default {
         async loadUnpaidInvoices() {
             this.loading = true;
             try {
-                const invoices = await dashboardAxios.get('/invoices/unpaid');
-                this.unpaidInvoices = invoices || [];
+                const { data } = await dashboardAxios.get('/invoices/unpaid');
+                this.unpaidInvoices = Array.isArray(data) ? data : [];
                 console.log('Loaded unpaid invoices:', this.unpaidInvoices.length);
             } catch (error) {
                 console.error('Failed to load invoices:', error);

@@ -405,6 +405,7 @@ function terbilang($n) {
     if ($n < 2000) return "Seribu" . ($n - 1000 ? " " . terbilang($n - 1000) : "");
     if ($n < 1000000) return terbilang((int)($n / 1000)) . " Ribu" . ($n % 1000 ? " " . terbilang($n % 1000) : "");
     if ($n < 1000000000) return terbilang((int)($n / 1000000)) . " Juta" . ($n % 1000000 ? " " . terbilang($n % 1000000) : "");
-    return terbilang((int)($n / 1000000000)) . " Milyar" . ($n % 1000000000 ? " " . terbilang($n % 1000000000) : "");
+    if ($n < 1000000000000) return terbilang((int)($n / 1000000000)) . " Milyar" . ($n % 1000000000 ? " " . terbilang($n % 1000000000) : "");
+    return terbilang((int)($n / 1000000000000)) . " Triliun" . ($n % 1000000000000 ? " " . terbilang($n % 1000000000000) : "");
 }
 @endphp

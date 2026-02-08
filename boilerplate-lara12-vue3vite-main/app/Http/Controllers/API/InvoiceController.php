@@ -2,7 +2,9 @@
 namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Mail\InvoiceNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller {
@@ -306,5 +308,46 @@ class InvoiceController extends Controller {
     
     public function nextNumber() {
         return response()->json(['next_number' => Invoice::generateNumber()]);
+    }
+
+    public function sendEmail(Request $request, Invoice $invoice) {
+        // Validate customer has email
+        if (!$invoice->customer_id) {
+            return response()->json([
+                'message' => '❌ Customer email is required to send invoice'
+            ], 422);
+        }
+
+        $customer = $invoice->customer;
+        if (!$customer || !$customer->email) {
+            return response()->json([
+                'message' => '❌ Customer does not have a valid email address'
+            ], 422);
+        }
+
+        try {
+            // Send email using queue
+            Mail::to($customer->email)
+                ->queue(new InvoiceNotification($invoice));
+
+            return response()->json([
+                'message' => "✅ Email queued successfully for {$customer->email}",
+                'data' => [
+                    'invoice_id' => $invoice->id,
+                    'customer_email' => $customer->email,
+                    'sent_at' => now()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send invoice email', [
+                'invoice_id' => $invoice->id,
+                'customer_email' => $customer->email ?? 'unknown',
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'message' => '❌ Failed to send email: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

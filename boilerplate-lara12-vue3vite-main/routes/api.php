@@ -124,6 +124,7 @@ Route::middleware(['auth:sanctum', LogApiRequests::class])->group(function () {
             Route::put('/{invoice}',[InvoiceController::class,'update']);
             Route::delete('/{invoice}',[InvoiceController::class,'destroy']);
             Route::get('/{invoice}/pdf',[InvoiceController::class,'pdf']);
+            Route::post('/{invoice}/send-email',[InvoiceController::class,'sendEmail']);
             
             // Status action routes
             Route::post('/{invoice}/mark-as-quoted',[InvoiceController::class,'markAsQuoted']);
