@@ -3,10 +3,10 @@
         <!-- Navbar -->
         <nav class="bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700">
             <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-                <router-link to="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-                    <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Logo" />
-                    <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-                        {{ appName }}
+                <router-link to="/" class="flex items-center space-x-2 rtl:space-x-reverse">
+                    <span class="text-3xl">🍽️</span>
+                    <span class="self-center text-xl font-bold whitespace-nowrap text-gray-900 dark:text-white">
+                        PEMP
                     </span>
                 </router-link>
 
@@ -85,11 +85,16 @@
         <footer class="bg-white border-t border-gray-200 dark:bg-gray-900 dark:border-gray-700">
             <div class="max-w-screen-xl mx-auto p-4 md:py-8">
                 <div class="sm:flex sm:items-center sm:justify-between">
-                    <router-link to="/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
-                        <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Logo" />
-                        <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-                            {{ appName }}
-                        </span>
+                    <router-link to="/" class="flex items-center mb-4 sm:mb-0 space-x-2 rtl:space-x-reverse">
+                        <span class="text-4xl">🍽️</span>
+                        <div>
+                            <span class="self-center text-2xl font-bold whitespace-nowrap text-gray-900 dark:text-white block">
+                                PEMP
+                            </span>
+                            <span class="text-xs text-gray-600 dark:text-gray-400">
+                                PT EDO MANDIRI PRATAMA
+                            </span>
+                        </div>
                     </router-link>
                     <ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400">
                         <li>
