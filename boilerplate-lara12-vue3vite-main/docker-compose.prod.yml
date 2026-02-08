@@ -1,0 +1,84 @@
+version: "3.7"
+services:
+  app:
+    image: ecos:latest
+    container_name: ecos-app
+    restart: always
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - LOG_CHANNEL=single
+    networks:
+      - ecos
+    depends_on:
+      - db
+
+  reverb:
+    image: ecos:latest
+    container_name: ecos-reverb
+    restart: always
+    working_dir: /var/www/
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    expose:
+      - 8080
+    volumes:
+      - ./:/var/www
+    networks:
+      - ecos
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+
+  queue:
+    image: ecos:latest
+    container_name: ecos-queue
+    restart: always
+    working_dir: /var/www/
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    volumes:
+      - ./:/var/www
+    networks:
+      - ecos
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+
+  db:
+    image: mysql:5.7
+    container_name: ecos-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-invoice}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - ecos
+
+  nginx:
+    image: nginx:alpine
+    container_name: ecos-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d/
+    networks:
+      - ecos
+    depends_on:
+      - app
+
+volumes:
+  db_data:
+
+networks:
+  ecos:
+    driver: bridge
