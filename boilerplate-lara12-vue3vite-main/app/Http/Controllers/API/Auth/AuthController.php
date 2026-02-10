@@ -204,7 +204,7 @@ class AuthController extends Controller
             }
 
             // Send verification email
-            // Mail::to($emailRecipient)->send(new EmailVerification($otpCode, $verificationUrl, $user->name));
+            Mail::to($emailRecipient)->send(new EmailVerification($otpCode, $verificationUrl, $user->name));
 
             $message = $isNewUser
                 ? 'Pendaftaran berhasil! Silakan cek email Anda untuk verifikasi.'
