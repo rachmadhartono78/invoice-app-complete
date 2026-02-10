@@ -53,7 +53,7 @@
                             </p>
                         </div>
 
-                        <div class="p-6">
+                        <div class="p-4 md:p-6">
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                 <!-- Name -->
                                 <div class="lg:col-span-1">
@@ -178,7 +178,7 @@
                             </p>
                         </div>
 
-                        <div class="p-6 space-y-6">
+                        <div class="p-4 md:p-6 space-y-6">
                             <!-- Additional Emails -->
                             <div>
                                 <identifier-input v-model="emailIdentifiers" type="email" label="Email Tambahan"
@@ -293,7 +293,7 @@
                             </p>
                         </div>
 
-                        <div class="p-6">
+                        <div class="p-4 md:p-6">
                             <!-- Existing Authorities -->
                             <div v-if="user.authorities && user.authorities.length > 0" class="space-y-4 mb-6">
                                 <div v-for="(authority, index) in user.authorities" :key="index"

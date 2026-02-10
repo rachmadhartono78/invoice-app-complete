@@ -1,5 +1,5 @@
 <template>
-    <div class="p-6">
+    <div class="p-4 md:p-6">
         <h1 class="text-2xl font-bold mb-6">
             {{ id ? "Edit" : "New" }} Invoice
         </h1>
@@ -16,7 +16,7 @@
             @submit.prevent="save"
             class="bg-white p-6 rounded shadow space-y-6"
         >
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block mb-1">Invoice #</label>
                     <input
@@ -51,7 +51,7 @@
                         class="border px-3 py-2 rounded w-full"
                     />
                 </div>
-                <div class="col-span-2">
+                <div class="md:col-span-2">
                     <label class="block mb-1">Customer <span class="text-red-600 font-bold">*</span></label>
                     <input
                         v-model="f.customer_name"
@@ -114,9 +114,9 @@
                 <div
                     v-for="(it, i) in f.items"
                     :key="i"
-                    class="grid grid-cols-8 gap-2 mb-2 items-end"
+                    class="grid grid-cols-1 md:grid-cols-8 gap-2 mb-4 md:mb-2 items-end border-b pb-4 md:border-0 md:pb-0"
                 >
-                    <div class="col-span-2 relative">
+                    <div class="md:col-span-2 relative">
                         <label class="block text-xs">Select Item <span class="text-red-600 font-bold">*</span></label>
                         <input
                             v-model="itemSearch[i]"
@@ -204,7 +204,7 @@
                 @confirm="handleItemsSelected"
             />
 
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block mb-1">Discount</label
                     ><input
@@ -236,7 +236,7 @@
                     {{ terbilangPlaceholder }}
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block mb-1">Prepared By</label>
                     <input v-model="f.prepared_by" class="border px-3 py-2 rounded w-full" />

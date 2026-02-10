@@ -1,5 +1,5 @@
 <template>
-    <div class="p-6 max-w-4xl mx-auto">
+    <div class="p-4 md:p-6 max-w-4xl mx-auto">
         <div class="mb-6">
             <h1 class="text-2xl font-bold dark:text-white">{{ isEdit ? 'Edit Item' : 'New Item' }}</h1>
         </div>
