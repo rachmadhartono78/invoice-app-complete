@@ -43,9 +43,9 @@ class UserSeeder extends Seeder
         $data = [
             [
                 'id' => '1',
-                'name' => 'Super Admin',
-                'email' => 'superadmin@example.com',
-                'password' => Hash::make('password'),
+                'name' => env('SUPERADMIN_NAME', 'Super Admin'),
+                'email' => env('SUPERADMIN_EMAIL', 'superadmin@example.com'),
+                'password' => Hash::make(env('SUPERADMIN_PASSWORD', 'password')),
                 'phone' => '+62812345678901',
                 'registration_number' => 'SA-001',
                 'email_verified_at' => now(),
