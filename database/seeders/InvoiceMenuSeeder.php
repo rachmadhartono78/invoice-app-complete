@@ -14,7 +14,7 @@ class InvoiceMenuSeeder extends Seeder
         // This avoids double nesting in the URL path
         $application = Application::firstOrCreate(
         ['name' => 'Main Application'],
-        ['url' => 'main-app']
+        ['url' => '']
         );
 
         // Create Parent Menu: Invoices (Dropdown)

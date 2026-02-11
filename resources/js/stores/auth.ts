@@ -38,7 +38,7 @@ export const useAuthStore = defineStore('auth', {
                         menu.menu_induk?.url,
                         menu.url
                     ].filter(p => p && p.trim());
-                    
+
                     return {
                         ...menu,
                         full_path: `/app/${pathParts.join('/')}`
@@ -77,14 +77,18 @@ export const useAuthStore = defineStore('auth', {
 
                         // Add child menu to the parent
                         const parentMenu = menuMap.get(parentName);
-                        if (parentMenu && parentMenu.children) {
+                        if (parentMenu) {
+                            if (!parentMenu.children) {
+                                parentMenu.children = [];
+                            }
+
                             // Build URL path dynamically, filtering out empty values
                             const urlParts = [
                                 menu.application?.url,
                                 menu.menu_induk?.url,
                                 menu.url
                             ].filter(p => p && p.trim());
-                            
+
                             parentMenu.children.push({
                                 name: menu.name,
                                 url: `/app/${urlParts.join('/')}`,
@@ -99,7 +103,7 @@ export const useAuthStore = defineStore('auth', {
                                 menu.application?.url,
                                 menu.url
                             ].filter(p => p && p.trim());
-                            
+
                             menuMap.set(menu.name, {
                                 name: menu.name,
                                 url: `/app/${urlParts.join('/')}`,
