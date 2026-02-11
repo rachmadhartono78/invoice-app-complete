@@ -13,18 +13,18 @@ class InvoiceMenuSeeder extends Seeder
         // Use existing 'Main Application' or create one without specific URL
         // This avoids double nesting in the URL path
         $application = Application::firstOrCreate(
-            ['name' => 'Main Application'],
-            []  // Let application URL be null/empty
+        ['name' => 'Main Application'],
+        ['url' => 'main-app']
         );
 
         // Create Parent Menu: Invoices (Dropdown)
         $parentMenu = Menu::firstOrCreate(
-            ['name' => 'Invoices', 'application_id' => $application->id, 'menu_id' => null],
-            [
-                'url' => 'invoices',
-                'icon' => '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
-                'order' => 2,
-            ]
+        ['name' => 'Invoices', 'application_id' => $application->id, 'menu_id' => null],
+        [
+            'url' => 'invoices',
+            'icon' => '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
+            'order' => 2,
+        ]
         );
 
         // Child Menus
@@ -63,16 +63,16 @@ class InvoiceMenuSeeder extends Seeder
 
         foreach ($childMenus as $menuData) {
             Menu::firstOrCreate(
-                [
-                    'name' => $menuData['name'],
-                    'application_id' => $application->id,
-                    'menu_id' => $parentMenu->id
-                ],
-                [
-                    'url' => $menuData['url'],
-                    'icon' => $menuData['icon'],
-                    'order' => $menuData['order'],
-                ]
+            [
+                'name' => $menuData['name'],
+                'application_id' => $application->id,
+                'menu_id' => $parentMenu->id
+            ],
+            [
+                'url' => $menuData['url'],
+                'icon' => $menuData['icon'],
+                'order' => $menuData['order'],
+            ]
             );
         }
 
