@@ -1,134 +1,53 @@
 <template>
-    <div class="p-6">
-        <div class="flex justify-between mb-6">
-            <h1 class="text-2xl font-bold dark:text-white">Customers</h1>
-            <button
-                @click="$router.push('/app/invoices/customers/create')"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                New Customer
-            </button>
-        </div>
+    <div class="p-4 bg-white block sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700 rounded-xl">
+        <div class="w-full mb-1">
+            <div class="mb-4">
+                <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Customers</h1>
+            </div>
 
-        <!-- Filters -->
-        <div class="flex gap-4 mb-4">
-            <input
-                v-model="filters.search"
-                @input="load"
-                placeholder="Search by name, code, phone, email..."
-                class="border dark:border-gray-600 px-3 py-2 rounded flex-1 dark:bg-gray-700 dark:text-white"
-            />
-            <select
-                v-model="filters.is_active"
-                @change="load"
-                class="border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
+            <table-molecule
+                :columns="columns"
+                :data="customers"
+                :loading="loading"
+                :server-side="true"
+                :total-items="pagination.total"
+                :per-page="pagination.per_page"
+                :current-page="pagination.current_page"
+                :show-add-button="true"
+                :with-checkbox="false"
+                @page-change="changePage"
+                @search="handleSearch"
+                @onAdd="navigateToAdd"
+                @detail-clicked="navigateToDetail"
+                @edit-clicked="navigateToEdit"
+                @delete-clicked="confirmDelete"
             >
-                <option value="">All Status</option>
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
-            </select>
-        </div>
-
-        <!-- Table -->
-        <div class="bg-white dark:bg-gray-800 rounded shadow overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-100 dark:bg-gray-700">
-                    <tr>
-                        <th class="p-3 text-left dark:text-gray-200">Code</th>
-                        <th class="p-3 text-left dark:text-gray-200">Name</th>
-                        <th class="p-3 text-left dark:text-gray-200">Contact</th>
-                        <th class="p-3 text-left dark:text-gray-200">Payment Terms</th>
-                        <th class="p-3 text-center dark:text-gray-200">Status</th>
-                        <th class="p-3 text-center dark:text-gray-200">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="loading" class="border-t dark:border-gray-700">
-                        <td colspan="6" class="p-4 text-center dark:text-gray-300">Loading...</td>
-                    </tr>
-                    <tr v-else-if="!customers.length" class="border-t dark:border-gray-700">
-                        <td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">No customers found</td>
-                    </tr>
-                    <tr
-                        v-else
-                        v-for="customer in customers"
-                        :key="customer.id"
-                        class="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
+                <!-- Custom Column: Status -->
+                <template v-slot:column-status="{ row }">
+                    <span
+                        :class="row.is_active ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
+                        class="px-2.5 py-0.5 rounded text-xs font-medium"
                     >
-                        <td class="p-3 dark:text-gray-300">{{ customer.code }}</td>
-                        <td class="p-3 dark:text-gray-300">
-                            <div class="font-medium">{{ customer.name }}</div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ customer.email }}</div>
-                        </td>
-                        <td class="p-3 dark:text-gray-300">
-                            <div v-if="customer.phone">📞 {{ customer.phone }}</div>
-                            <div v-if="customer.contact_person" class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ customer.contact_person }}
-                            </div>
-                        </td>
-                        <td class="p-3 dark:text-gray-300">{{ formatPaymentTerms(customer.payment_terms) }}</td>
-                        <td class="p-3 text-center">
-                            <span
-                                :class="customer.is_active ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
-                                class="px-2 py-1 rounded text-xs"
-                            >
-                                {{ customer.is_active ? 'Active' : 'Inactive' }}
-                            </span>
-                        </td>
-                        <td class="p-3">
-                            <div class="flex gap-2 justify-center">
-                                <button
-                                    @click="$router.push(`/app/invoices/customers/${customer.id}`)"
-                                    class="text-blue-600 dark:text-blue-400 hover:text-blue-800"
-                                    title="View"
-                                >
-                                    👁
-                                </button>
-                                <button
-                                    @click="$router.push(`/app/invoices/customers/${customer.id}/edit`)"
-                                    class="text-green-600 dark:text-green-400 hover:text-green-800"
-                                    title="Edit"
-                                >
-                                    ✏️
-                                </button>
-                                <button
-                                    @click="confirmDelete(customer)"
-                                    class="text-red-600 dark:text-red-400 hover:text-red-800"
-                                    title="Delete"
-                                >
-                                    🗑
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                        {{ row.is_active ? 'Active' : 'Inactive' }}
+                    </span>
+                </template>
 
-        <!-- Pagination -->
-        <div v-if="pagination.total > 0" class="mt-4 flex justify-between items-center dark:text-gray-300">
-            <div>
-                Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} entries
-            </div>
-            <div class="flex gap-2">
-                <button
-                    @click="changePage(pagination.current_page - 1)"
-                    :disabled="pagination.current_page === 1"
-                    class="px-3 py-1 border dark:border-gray-600 rounded disabled:opacity-50 dark:bg-gray-700"
-                >
-                    Previous
-                </button>
-                <button
-                    @click="changePage(pagination.current_page + 1)"
-                    :disabled="pagination.current_page === pagination.last_page"
-                    class="px-3 py-1 border dark:border-gray-600 rounded disabled:opacity-50 dark:bg-gray-700"
-                >
-                    Next
-                </button>
-            </div>
+                 <!-- Custom Column: Contact -->
+                 <template v-slot:column-contact="{ row }">
+                    <div v-if="row.phone">{{ row.phone }}</div>
+                    <div v-if="row.contact_person" class="text-xs text-gray-500 dark:text-gray-400">
+                        CP: {{ row.contact_person }}
+                    </div>
+                </template>
+
+                <!-- Custom Column: Name -->
+                 <template v-slot:column-name="{ row }">
+                    <div class="font-medium text-gray-900 dark:text-white">{{ row.name }}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ row.email }}</div>
+                </template>
+
+
+            </table-molecule>
         </div>
     </div>
 </template>
@@ -149,11 +68,37 @@ export default {
             pagination: {
                 current_page: 1,
                 last_page: 1,
-                per_page: 15,
+                per_page: 10,
                 total: 0,
                 from: 0,
                 to: 0
-            }
+            },
+            columns: [
+                {
+                    name: 'Code',
+                    prop: 'code',
+                },
+                {
+                    name: 'Name',
+                    prop: 'name',
+                },
+                {
+                    name: 'Contact',
+                    prop: 'contact',
+                },
+                {
+                    name: 'Payment Terms',
+                    prop: 'payment_terms_label', // We need to map this in data processing
+                },
+                 {
+                    name: 'Status',
+                    prop: 'status',
+                },
+                {
+                    name: 'Action',
+                    prop: 'actions',
+                },
+            ],
         };
     },
     mounted() {
@@ -168,13 +113,27 @@ export default {
                     per_page: this.pagination.per_page,
                     ...this.filters
                 };
-                // dashboardAxios interceptor returns response.data directly
+                
                 const response = await dashboardAxios.get('/customers', { params });
-                this.customers = response?.data || [];
+                const result = response?.data || [];
+                
+                // Map data to match table expectations and add formatted fields
+                this.customers = result.map(customer => ({
+                    ...customer,
+                    payment_terms_label: this.formatPaymentTerms(customer.payment_terms),
+                    // Add required actions flags if your backend doesn't provide them, 
+                    // or rely on the backend response. 
+                    // Assuming TableMolecule expects 'actions' object for built-in buttons
+                    actions: {
+                        canUpdate: true,
+                        canDelete: true,
+                    }
+                }));
+
                 this.pagination = {
                     current_page: response?.current_page || 1,
                     last_page: response?.last_page || 1,
-                    per_page: response?.per_page || 15,
+                    per_page: response?.per_page || 10,
                     total: response?.total || 0,
                     from: response?.from || 0,
                     to: response?.to || 0
@@ -188,10 +147,22 @@ export default {
             }
         },
         changePage(page) {
-            if (page >= 1 && page <= this.pagination.last_page) {
-                this.pagination.current_page = page;
-                this.load();
-            }
+            this.pagination.current_page = page;
+            this.load();
+        },
+        handleSearch(query) {
+            this.filters.search = query;
+            this.pagination.current_page = 1;
+            this.load();
+        },
+        navigateToAdd() {
+            this.$router.push('/app/invoices/customers/create');
+        },
+        navigateToDetail(row) {
+            this.$router.push(`/app/invoices/customers/${row.id}`);
+        },
+        navigateToEdit(row) {
+            this.$router.push(`/app/invoices/customers/${row.id}/edit`);
         },
         formatPaymentTerms(terms) {
             const map = {
@@ -204,12 +175,20 @@ export default {
             };
             return map[terms] || terms;
         },
-        async confirmDelete(customer) {
-            if (!confirm(`Are you sure you want to delete customer "${customer.name}"?`)) {
+        async confirmDelete(row) {
+            // Check if user has confirmation dialog or use browser confirm for now as per reference
+             // The reference uses a custom confirmation dialog component. 
+             // We can emit an event or use the standard confirm for quick parity if we don't have the ref locally working perfectly yet.
+             // But looking at reference `Index.vue`, it imports `confirmation-dialog`.
+             // I'll stick to simple confirm for now to match the previous implementation, 
+             // or I can implement the dialog if I see it in `App.vue/Global`. 
+             // usage: <confirmation-dialog ... />
+
+            if (!confirm(`Are you sure you want to delete customer "${row.name}"?`)) {
                 return;
             }
             try {
-                await dashboardAxios.delete(`/customers/${customer.id}`);
+                await dashboardAxios.delete(`/customers/${row.id}`);
                 this.$emit('showToast', 'Customer deleted successfully', 'success');
                 this.load();
             } catch (error) {
