@@ -1,274 +1,316 @@
 <template>
-    <div class="p-4 md:p-6">
-        <h1 class="text-2xl font-bold mb-6">
-            {{ id ? "Edit" : "New" }} Invoice
-        </h1>
-        
-        <!-- Required Fields Legend -->
-        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded flex items-start gap-2">
-            <div class="text-sm">
-                <span class="font-semibold">Tanda: <span class="text-red-600 font-bold text-lg">*</span> = Field wajib diisi</span>
-                <p class="text-xs text-gray-600 mt-1">Pastikan semua field yang ditandai sudah terisi sebelum menyimpan.</p>
+    <div class="p-4 md:p-6 max-w-7xl mx-auto">
+        <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+            <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    {{ id ? "Edit Invoice" : "New Invoice" }}
+                </h3>
             </div>
-        </div>
         
-        <form
-            @submit.prevent="save"
-            class="bg-white p-6 rounded shadow space-y-6"
-        >
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block mb-1">Invoice #</label>
-                    <input
-                        v-model="f.invoice_number"
-                        :readonly="!id"
-                        :disabled="!id"
-                        :placeholder="!id ? 'Auto-generated' : ''"
-                        :class="!id ? 'bg-gray-100 cursor-not-allowed' : ''"
-                        class="border px-3 py-2 rounded w-full"
-                    />
-                    <div v-if="!id && nextInvoiceNumber" class="text-xs text-gray-500 mt-1">
-                        Next: {{ nextInvoiceNumber }}
-                    </div>
-                </div>
-                <div>
-                    <label class="block mb-1">Invoice Date <span class="text-red-600 font-bold">*</span></label>
-                    <input
-                        v-model="f.invoice_date"
-                        type="date"
-                        required
-                        :class="[
-                            'border px-3 py-2 rounded w-full',
-                            errors.invoice_date ? 'border-red-600 bg-red-50' : 'border-gray-300'
-                        ]"
-                    />
-                    <div v-if="errors.invoice_date" class="text-red-600 text-xs mt-1">{{ errors.invoice_date }}</div>
-                </div>
-                <div>
-                    <label class="block mb-1">Currency</label>
-                    <input
-                        v-model="f.currency_name"
-                        class="border px-3 py-2 rounded w-full"
-                    />
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block mb-1">Customer <span class="text-red-600 font-bold">*</span></label>
-                    <input
-                        v-model="f.customer_name"
-                        required
-                        :class="[
-                            'border px-3 py-2 rounded w-full',
-                            errors.customer_name ? 'border-red-600 bg-red-50' : 'border-gray-300'
-                        ]"
-                    />
-                    <div v-if="errors.customer_name" class="text-red-600 text-xs mt-1">{{ errors.customer_name }}</div>
-                </div>
-                <div>
-                    <label class="block mb-1">PO Number</label>
-                    <input
-                        v-model="f.po_number"
-                        class="border px-3 py-2 rounded w-full"
-                    />
-                </div>
-                <div>
-                    <label class="block mb-1">Address</label>
-                    <input
-                        v-model="f.customer_address"
-                        class="border px-3 py-2 rounded w-full"
-                    />
-                </div>
-                <div>
-                    <label class="block mb-1">Payment Terms</label>
-                    <input
-                        v-model="f.payment_terms"
-                        placeholder="eg: COD"
-                        class="border px-3 py-2 rounded w-full"
-                    />
-                </div>
-                <div>
-                    <label class="block mb-1">Expedition</label>
-                    <input
-                        v-model="f.expedition"
-                        class="border px-3 py-2 rounded w-full"
-                    />
+            <!-- Required Fields Legend -->
+            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2 dark:bg-blue-900/30 dark:border-blue-800">
+                <div class="text-sm dark:text-gray-300">
+                    <span class="font-semibold">Note: <span class="text-red-600 font-bold text-lg">*</span> = Required Fields</span>
+                    <p class="text-xs text-gray-600 mt-1 dark:text-gray-400">Ensure all marked fields are filled before saving.</p>
                 </div>
             </div>
-            <!-- Items Section -->
-            <div>
-                <div class="flex justify-between items-end mb-2">
-                    <h3 class="font-bold">Items <span class="text-red-600 font-bold">*</span> (At least 1 item required)</h3>
-                    <button 
-                        type="button" 
-                        @click="showItemSelector = true"
-                        class="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 flex items-center gap-1"
-                    >
-                        <span>📚</span> Ambil dari Katalog (Batch)
-                    </button>
-                </div>
-                <div v-if="errors.items" class="mb-2 p-3 bg-red-50 border border-red-600 rounded text-red-700 text-sm">
-                    ⚠️ {{ errors.items }}
-                </div>
-                <!-- Group Items by Area in Display? Or just flat list with Area column? 
-                     For now, flat list with Area column is easier to implement in Form. 
-                     PDF will handle grouping. -->
-                <div
-                    v-for="(it, i) in f.items"
-                    :key="i"
-                    class="grid grid-cols-1 md:grid-cols-8 gap-2 mb-4 md:mb-2 items-end border-b pb-4 md:border-0 md:pb-0"
-                >
-                    <div class="md:col-span-2 relative">
-                        <label class="block text-xs">Select Item <span class="text-red-600 font-bold">*</span></label>
+            
+            <form @submit.prevent="save">
+                <div class="grid gap-4 mb-4 sm:grid-cols-3">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Invoice #</label>
                         <input
-                            v-model="itemSearch[i]"
-                            type="text"
-                            placeholder="Search item..."
-                            @focus="itemSearch[i] = itemSearch[i] || ''"
-                            class="border px-2 py-1 rounded w-full text-sm"
-                            :class="!it.item_id && Object.keys(errors).length > 0 ? 'border-red-600 bg-red-50' : 'border-gray-300'"
+                            v-model="f.invoice_number"
+                            :readonly="true"
+                            disabled
+                            placeholder="Auto-generated"
+                            class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 cursor-not-allowed dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400"
                         />
-                        <!-- Search Dropdown Logic (Existing) -->
-                        <div v-if="itemSearch[i] && getFilteredItems(i).length > 0"
-                            class="absolute top-full left-0 right-0 mt-1 border border-gray-300 bg-white rounded z-10 max-h-48 overflow-y-auto shadow-lg">
-                            <div v-for="item in getFilteredItems(i)"
-                                :key="item.id"
-                                @click="selectItemFromSearch(i, item)"
-                                class="px-2 py-2 hover:bg-blue-100 cursor-pointer text-sm border-b border-gray-200 last:border-b-0">
-                                <div class="font-semibold text-gray-800">{{ item.name }}</div>
-                                <div class="text-xs text-gray-500">{{ item.code }} • {{ item.unit }} • Rp {{ fmt(item.price) }}</div>
-                            </div>
-
+                         <div v-if="!id && nextInvoiceNumber" class="text-xs text-gray-500 mt-1 dark:text-gray-400">
+                            Next: {{ nextInvoiceNumber }}
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs">Area</label>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Invoice Date <span class="text-red-600 font-bold">*</span></label>
                         <input
-                            v-model="it.area"
-                            class="border border-gray-300 px-2 py-1 rounded w-full text-sm bg-gray-50"
-                            placeholder="Area"
-                        />
-                    </div>
-                    <div>
-                        <label class="block text-xs">Code</label>
-                        <input
-                            v-model="it.item_code"
-                            class="border border-gray-300 px-2 py-1 rounded w-full text-sm"
-                        />
-                    </div>
-                    <!-- Reuse existing fields -->
-                    <div>
-                        <label class="block text-xs">Qty <span class="text-red-600 font-bold">*</span></label>
-                        <input
-                            v-model.number="it.quantity"
-                            type="number"
+                            v-model="f.invoice_date"
+                            type="date"
                             required
-                            class="border px-2 py-1 rounded w-full text-sm"
+                             :class="[
+                                'bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500',
+                                errors.invoice_date ? 'border-red-600 bg-red-50 dark:border-red-500 dark:bg-red-900/30' : 'border-gray-300'
+                            ]"
                         />
+                        <div v-if="errors.invoice_date" class="text-red-600 text-xs mt-1">{{ errors.invoice_date }}</div>
                     </div>
                     <div>
-                        <label class="block text-xs">Price <span class="text-red-600 font-bold">*</span></label>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Currency</label>
                         <input
-                            v-model.number="it.unit_price"
-                            type="number"
+                            v-model="f.currency_name"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Customer <span class="text-red-600 font-bold">*</span></label>
+                        <input
+                            v-model="f.customer_name"
                             required
-                            class="border px-2 py-1 rounded w-full text-sm"
+                            :class="[
+                                'bg-gray-50 border text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white',
+                                errors.customer_name ? 'border-red-600 bg-red-50' : 'border-gray-300'
+                            ]"
+                            placeholder="Customer Name"
+                        />
+                        <div v-if="errors.customer_name" class="text-red-600 text-xs mt-1">{{ errors.customer_name }}</div>
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">PO Number</label>
+                        <input
+                            v-model="f.po_number"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Address</label>
+                        <input
+                            v-model="f.customer_address"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="Full Address"
                         />
                     </div>
                     <div>
-                        <label class="block text-xs">Disc</label>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Payment Terms</label>
                         <input
-                            v-model.number="it.discount"
-                            type="number"
-                            class="border border-gray-300 px-2 py-1 rounded w-full text-sm"
+                            v-model="f.payment_terms"
+                            placeholder="e.g. COD, Net 30"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                     </div>
-                    <div class="flex gap-1">
-                        <span class="border border-gray-300 px-2 py-1 rounded bg-gray-100 text-sm flex-1">
-                            {{ fmt((it.quantity || 0) * (it.unit_price || 0) - (it.discount || 0)) }}
-                        </span>
-                        <button type="button" @click="deleteItem(i)" class="text-red-600 hover:text-red-800">🗑</button>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Expedition</label>
+                        <input
+                            v-model="f.expedition"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
                     </div>
                 </div>
-                <button
-                    type="button"
-                    @click="addNewItem"
-                    class="text-blue-600 text-sm hover:text-blue-800"
-                >
-                    + Add Single Item
-                </button>
-            </div>
-            
-            <InternalItemSelector 
-                :show="showItemSelector" 
-                :items="masterItems"
-                @close="showItemSelector = false"
-                @confirm="handleItemsSelected"
-            />
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block mb-1">Discount</label
-                    ><input
-                        v-model.number="f.discount"
-                        type="number"
-                        class="border px-3 py-2 rounded w-full"
-                    />
+                <!-- Items Section -->
+                <div class="mt-8 mb-4">
+                    <div class="flex justify-between items-end mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Items <span class="text-red-600">*</span></h3>
+                        <button 
+                            type="button" 
+                            @click="showItemSelector = true"
+                            class="text-sm bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 flex items-center gap-2 transition-colors duration-200"
+                        >
+                            <span>📚</span> Open Catalog
+                        </button>
+                    </div>
+                    
+                    <div v-if="errors.items" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm dark:bg-red-900/30 dark:border-red-800 dark:text-red-400">
+                        ⚠️ {{ errors.items }}
+                    </div>
+
+                    <div class="space-y-4">
+                        <div
+                            v-for="(it, i) in f.items"
+                            :key="i"
+                            class="p-4 border border-gray-200 rounded-lg bg-gray-50/50 dark:bg-gray-700/50 dark:border-gray-600"
+                        >
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                <!-- Item Search -->
+                                <div class="md:col-span-3 relative">
+                                    <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Item <span class="text-red-600">*</span></label>
+                                    <input
+                                        v-model="itemSearch[i]"
+                                        type="text"
+                                        placeholder="Search item..."
+                                        @focus="itemSearch[i] = itemSearch[i] || ''"
+                                        class="bg-white border text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                        :class="!it.item_id && Object.keys(errors).length > 0 ? 'border-red-500' : 'border-gray-300'"
+                                    />
+                                    <!-- Search Dropdown -->
+                                    <div v-if="itemSearch[i] && getFilteredItems(i).length > 0"
+                                        class="absolute top-full left-0 right-0 mt-1 border border-gray-200 bg-white rounded-lg z-20 max-h-48 overflow-y-auto shadow-xl dark:bg-gray-700 dark:border-gray-600">
+                                        <div v-for="item in getFilteredItems(i)"
+                                            :key="item.id"
+                                            @click="selectItemFromSearch(i, item)"
+                                            class="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 dark:border-gray-600 dark:hover:bg-gray-600">
+                                            <div class="font-semibold text-gray-800 dark:text-white">{{ item.name }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ item.code }} • {{ item.unit }} • Rp {{ fmt(item.price) }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Area</label>
+                                    <input
+                                        v-model="it.area"
+                                        class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                    />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Code</label>
+                                    <input
+                                        v-model="it.item_code"
+                                        class="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                        readonly
+                                    />
+                                </div>
+                                <div class="md:col-span-1">
+                                    <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Qty <span class="text-red-600">*</span></label>
+                                    <input
+                                        v-model.number="it.quantity"
+                                        type="number"
+                                        required
+                                        class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                    />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Price <span class="text-red-600">*</span></label>
+                                    <input
+                                        v-model.number="it.unit_price"
+                                        type="number"
+                                        required
+                                        class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                    />
+                                </div>
+                                <div class="md:col-span-1">
+                                    <label class="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">Disc</label>
+                                    <input
+                                        v-model.number="it.discount"
+                                        type="number"
+                                        class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                    />
+                                </div>
+                                    <div class="md:col-span-1 flex items-center justify-end h-full py-2.5">
+                                    <button type="button" @click="deleteItem(i)" class="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/50 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Subtotal for item -->
+                             <div class="text-right mt-2 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                                Subtotal: {{ fmt((it.quantity || 0) * (it.unit_price || 0) - (it.discount || 0)) }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button
+                        type="button"
+                        @click="addNewItem"
+                        class="mt-4 text-primary-600 text-sm font-medium hover:text-primary-800 flex items-center gap-1 dark:text-primary-400 dark:hover:text-primary-300"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Add Single Item
+                    </button>
                 </div>
-                <div>
-                    <label class="block mb-1">PPN %</label
-                    ><input
-                        v-model.number="f.ppn_percent"
-                        type="number"
-                        class="border px-3 py-2 rounded w-full"
-                    />
+                
+                <InternalItemSelector 
+                    :show="showItemSelector" 
+                    :items="masterItems"
+                    @close="showItemSelector = false"
+                    @confirm="handleItemsSelected"
+                />
+
+                <div class="border-t border-gray-200 mt-6 pt-6 dark:border-gray-700">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Left Calculation -->
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Global Discount</label>
+                                <input
+                                    v-model.number="f.discount"
+                                    type="number"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">PPN %</label>
+                                <input
+                                    v-model.number="f.ppn_percent"
+                                    type="number"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                            </div>
+                             <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Other Charges</label>
+                                <input
+                                    v-model.number="f.other_charges"
+                                    type="number"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                            </div>
+                        </div>
+
+                         <!-- Middle Info -->
+                        <div class="space-y-4 md:col-span-1">
+                             <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Prepared By</label>
+                                <input v-model="f.prepared_by" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                            </div>
+                            <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Approved By</label>
+                                <input v-model="f.approved_by" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                            </div>
+                             <div>
+                                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Terbilang</label>
+                                <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 italic dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">
+                                    {{ terbilangPlaceholder }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Total -->
+                        <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 h-fit dark:bg-gray-700/50 dark:border-gray-600">
+                             <div class="flex justify-between mb-2 text-sm text-gray-600 dark:text-gray-400">
+                                <span>Subtotal</span>
+                                <span>{{ fmt(subtotal) }}</span>
+                            </div>
+                             <div class="flex justify-between mb-2 text-sm text-gray-600 dark:text-gray-400" v-if="f.discount > 0">
+                                <span>Discount</span>
+                                <span class="text-red-500">- {{ fmt(f.discount) }}</span>
+                            </div>
+                             <div class="flex justify-between mb-2 text-sm text-gray-600 dark:text-gray-400" v-if="f.ppn_percent > 0">
+                                <span>PPN ({{ f.ppn_percent }}%)</span>
+                                <span>+ {{ fmt((subtotal - f.discount) * f.ppn_percent / 100) }}</span>
+                            </div>
+                            <div class="flex justify-between mb-2 text-sm text-gray-600 dark:text-gray-400" v-if="f.other_charges > 0">
+                                <span>Other Charges</span>
+                                <span>+ {{ fmt(f.other_charges) }}</span>
+                            </div>
+                             <div class="border-t border-gray-300 my-3 pt-3 flex justify-between items-center dark:border-gray-500">
+                                <span class="text-lg font-bold text-gray-900 dark:text-white">Total</span>
+                                <span class="text-2xl font-bold text-primary-600 dark:text-primary-400">{{ fmt(total) }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block mb-1">Other Charges</label
-                    ><input
-                        v-model.number="f.other_charges"
-                        type="number"
-                        class="border px-3 py-2 rounded w-full"
-                    />
+
+                <div class="mt-6">
+                    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notes</label>
+                    <textarea v-model="f.notes" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
                 </div>
-            </div>
-            <div>
-                <label class="block mb-1">Terbilang (amount in words) - Auto-calculated from total</label>
-                <div class="border px-3 py-2 rounded w-full bg-blue-50 text-sm">
-                    {{ terbilangPlaceholder }}
+                
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-8 justify-end">
+                     <button
+                        type="button"
+                        @click="$router.push('/app/invoices/invoices')"
+                        class="text-gray-700 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="submit"
+                        class="text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 flex items-center justify-center gap-2"
+                    >
+                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                        Save Invoice
+                    </button>
                 </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block mb-1">Prepared By</label>
-                    <input v-model="f.prepared_by" class="border px-3 py-2 rounded w-full" />
-                </div>
-                <div>
-                    <label class="block mb-1">Approved By</label>
-                    <input v-model="f.approved_by" class="border px-3 py-2 rounded w-full" />
-                </div>
-            </div>
-            <div>
-                <label class="block mb-1">Notes / Keterangan</label>
-                <textarea v-model="f.notes" class="border px-3 py-2 rounded w-full" rows="4"></textarea>
-            </div>
-            <div class="text-right text-xl font-bold">
-                Total: {{ fmt(total) }}
-            </div>
-            <div class="flex gap-4 justify-end">
-                <button
-                    type="button"
-                    @click="$router.push('/app/invoices/invoices')"
-                    class="px-4 py-2 border rounded"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    class="px-4 py-2 bg-blue-600 text-white rounded"
-                >
-                    Save
-                </button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </template>
 <script setup>
