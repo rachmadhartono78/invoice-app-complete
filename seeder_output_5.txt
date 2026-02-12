@@ -1,0 +1,4 @@
+
+   INFO  Seeding database.  
+
+Error importing data: SQLSTATE[HY000]: General error: 1364 Field 'slug' doesn't have a default value (Connection: mysql, Host: 127.0.0.1, Port: 3306, Database: invoice_complate, SQL: insert into `item_categories` (`name`, `updated_at`, `created_at`) values (AREA, 2026-02-12 07:49:56, 2026-02-12 07:49:56))

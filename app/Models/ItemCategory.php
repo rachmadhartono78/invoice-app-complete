@@ -2,10 +2,12 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class ItemCategory extends Model {
-    protected $fillable = ['name', 'slug', 'description'];
+class ItemCategory extends Model
+{
+    protected $guarded = [];
 
-    public function items() {
-        return $this->hasMany(Item::class, 'category_id');
+    public function items()
+    {
+        return $this->hasMany(Item::class , 'category_id');
     }
 }
