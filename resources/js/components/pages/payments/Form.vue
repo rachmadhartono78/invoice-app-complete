@@ -1,153 +1,180 @@
 <template>
-    <div class="p-4 md:p-6 max-w-4xl mx-auto">
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold dark:text-white">{{ isEdit ? 'Edit Payment' : 'Record Payment' }}</h1>
-        </div>
-
-        <!-- Loading State -->
-        <div v-if="loading && !isEdit && !unpaidInvoices.length" class="bg-white dark:bg-gray-800 rounded shadow p-6">
-            <div class="text-center py-8">
-                <div class="text-gray-500 dark:text-gray-400">Loading invoices...</div>
-            </div>
-        </div>
-
-        <!-- No Unpaid Invoices Message -->
-        <div v-else-if="!isEdit && !unpaidInvoices.length && !loading" class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded shadow p-6">
-            <div class="flex items-start gap-4">
-                <div class="text-4xl flex-shrink-0">📝</div>
-                <div class="flex-1">
-                    <h2 class="text-lg font-bold text-yellow-800 dark:text-yellow-400 mb-2">Tidak Ada Invoice untuk Dibayar</h2>
-                    <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
-                        Semua invoice sudah terbayar lunas atau tidak ada invoice yang dalam status pending pembayaran. Silahkan periksa kembali status invoice Anda.
-                    </p>
-                    <div class="flex gap-3">
-                        <button
-                            @click="$router.push({ name: 'invoices-index' })"
-                            class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors"
-                        >
-                            Lihat Daftar Invoice
-                        </button>
-                        <button
-                            @click="$router.push({ name: 'payments-index' })"
-                            class="bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded text-sm font-semibold transition-colors"
-                        >
-                            Kembali
-                        </button>
-                    </div>
+    <div>
+        <div class="relative sm:p-4 xs:p-0 w-full h-full md:h-auto">
+            <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
+                <div class="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ isEdit ? 'Edit Payment' : 'Record Payment' }}
+                    </h3>
                 </div>
-            </div>
-        </div>
 
-        <!-- Payment Form -->
-        <form v-if="isEdit || (unpaidInvoices.length > 0)" @submit.prevent="submit" class="bg-white dark:bg-gray-800 rounded shadow p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Invoice Selection -->
-                <div class="md:col-span-2">
-                    <label class="block mb-2 font-medium dark:text-gray-200">Invoice <span class="text-red-500">*</span></label>
-                    <select
-                        v-model="form.invoice_id"
-                        @change="onInvoiceChange"
-                        required
-                        :disabled="isEdit"
-                        class="w-full border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
-                    >
-                        <option value="">Select Invoice</option>
-                        <option v-for="inv in unpaidInvoices" :key="inv.id" :value="inv.id">
-                            {{ inv.invoice_number }} - {{ inv.customer_name }} (Remaining: {{ formatCurrency(inv.remaining_balance) }})
-                        </option>
-                    </select>
-                    <div v-if="selectedInvoice" class="mt-2 p-3 bg-blue-50 dark:bg-blue-900 rounded text-sm dark:text-gray-200">
-                        <div class="font-medium">Invoice Details:</div>
-                        <div>Total: {{ formatCurrency(selectedInvoice.total) }}</div>
-                        <div>Paid: {{ formatCurrency(selectedInvoice.paid_amount || 0) }}</div>
-                        <div class="font-bold">Remaining: {{ formatCurrency(selectedInvoice.remaining_balance) }}</div>
+                <!-- Loading State -->
+                <div v-if="loading && !isEdit && !unpaidInvoices.length" class="text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Loading invoices...</p>
+                </div>
+
+                <!-- No Unpaid Invoices -->
+                <div v-else-if="!isEdit && !unpaidInvoices.length && !loading" class="py-8 text-center">
+                    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-6 max-w-lg mx-auto">
+                        <div class="text-4xl mb-3">📝</div>
+                        <h2 class="text-lg font-bold text-yellow-800 dark:text-yellow-400 mb-2">All Invoices Paid</h2>
+                        <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
+                            All invoices have been fully paid or there are no invoices pending payment.
+                        </p>
+                        <div class="flex gap-3 justify-center">
+                            <button
+                                @click="$router.push({ name: 'invoices-index' })"
+                                class="text-white bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-4 py-2.5"
+                            >
+                                View Invoices
+                            </button>
+                            <button
+                                @click="$router.push({ name: 'payments-index' })"
+                                class="text-gray-600 dark:text-white border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium rounded-lg text-sm px-4 py-2.5"
+                            >
+                                Back
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Payment Date -->
-                <div>
-                    <label class="block mb-2 font-medium dark:text-gray-200">Payment Date <span class="text-red-500">*</span></label>
-                    <input
-                        v-model="form.payment_date"
-                        type="date"
-                        required
-                        class="w-full border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
-                    />
-                </div>
+                <!-- Payment Form -->
+                <form v-if="isEdit || (unpaidInvoices.length > 0)" @submit.prevent="submit">
+                    <div class="grid gap-4 mb-4 sm:grid-cols-2">
+                        <!-- Invoice Selection -->
+                        <div class="sm:col-span-2">
+                            <label for="invoice_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Invoice <span class="text-red-500">*</span>
+                            </label>
+                            <select
+                                id="invoice_id"
+                                v-model="form.invoice_id"
+                                @change="onInvoiceChange"
+                                required
+                                :disabled="isEdit"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-60"
+                            >
+                                <option value="">Select Invoice</option>
+                                <option v-for="inv in unpaidInvoices" :key="inv.id" :value="inv.id">
+                                    {{ inv.invoice_number }} - {{ inv.customer_name }} (Remaining: {{ formatCurrency(inv.remaining_balance) }})
+                                </option>
+                            </select>
 
-                <!-- Amount -->
-                <div>
-                    <label class="block mb-2 font-medium dark:text-gray-200">Amount <span class="text-red-500">*</span></label>
-                    <input
-                        v-model="form.amount"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        :max="selectedInvoice?.remaining_balance"
-                        required
-                        class="w-full border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
-                        placeholder="0.00"
-                    />
-                </div>
+                            <!-- Invoice Summary -->
+                            <div v-if="selectedInvoice" class="mt-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800 text-sm">
+                                <div class="font-medium text-blue-800 dark:text-blue-300 mb-1">Invoice Details:</div>
+                                <div class="grid grid-cols-3 gap-2 text-gray-700 dark:text-gray-300">
+                                    <div>Total: <span class="font-semibold">{{ formatCurrency(selectedInvoice.total) }}</span></div>
+                                    <div>Paid: <span class="font-semibold">{{ formatCurrency(selectedInvoice.paid_amount || 0) }}</span></div>
+                                    <div>Remaining: <span class="font-bold text-blue-700 dark:text-blue-400">{{ formatCurrency(selectedInvoice.remaining_balance) }}</span></div>
+                                </div>
+                            </div>
+                        </div>
 
-                <!-- Payment Method -->
-                <div>
-                    <label class="block mb-2 font-medium dark:text-gray-200">Payment Method <span class="text-red-500">*</span></label>
-                    <select
-                        v-model="form.payment_method"
-                        required
-                        class="w-full border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
-                    >
-                        <option value="cash">Cash</option>
-                        <option value="bank_transfer">Bank Transfer</option>
-                        <option value="check">Check</option>
-                        <option value="giro">Giro</option>
-                        <option value="credit_card">Credit Card</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
+                        <!-- Payment Date -->
+                        <div>
+                            <label for="payment_date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Payment Date <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                id="payment_date"
+                                v-model="form.payment_date"
+                                required
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            />
+                        </div>
 
-                <!-- Reference Number -->
-                <div>
-                    <label class="block mb-2 font-medium dark:text-gray-200">Reference Number</label>
-                    <input
-                        v-model="form.reference_number"
-                        type="text"
-                        class="w-full border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
-                        placeholder="Bank ref, check number, etc"
-                    />
-                </div>
+                        <!-- Amount -->
+                        <div>
+                            <label for="amount" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Amount <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                id="amount"
+                                v-model="form.amount"
+                                step="0.01"
+                                min="0"
+                                :max="selectedInvoice?.remaining_balance"
+                                required
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                placeholder="0.00"
+                            />
+                        </div>
 
-                <!-- Notes -->
-                <div class="md:col-span-2">
-                    <label class="block mb-2 font-medium dark:text-gray-200">Notes</label>
-                    <textarea
-                        v-model="form.notes"
-                        rows="3"
-                        class="w-full border dark:border-gray-600 px-3 py-2 rounded dark:bg-gray-700 dark:text-white"
-                        placeholder="Additional notes..."
-                    ></textarea>
-                </div>
+                        <!-- Payment Method -->
+                        <div>
+                            <label for="payment_method" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                Payment Method <span class="text-red-500">*</span>
+                            </label>
+                            <select
+                                id="payment_method"
+                                v-model="form.payment_method"
+                                required
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            >
+                                <option value="cash">Cash</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="check">Check</option>
+                                <option value="giro">Giro</option>
+                                <option value="credit_card">Credit Card</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Reference Number -->
+                        <div>
+                            <label for="reference_number" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Reference Number</label>
+                            <input
+                                type="text"
+                                id="reference_number"
+                                v-model="form.reference_number"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                                placeholder="Bank ref, check number, etc"
+                            />
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="sm:col-span-2">
+                            <label for="notes" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notes</label>
+                            <textarea
+                                id="notes"
+                                v-model="form.notes"
+                                rows="3"
+                                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                                placeholder="Additional notes..."
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mt-5">
+                        <button type="button" @click="$router.push({ name: 'payments-index' })"
+                            class="text-gray-600 dark:text-white hover:text-white flex items-center justify-center w-full sm:w-auto border border-gray-700 dark:border-gray-500 hover:bg-gray-600 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:hover:bg-gray-700 dark:focus:ring-primary-800">
+                            <svg class="mr-1 -ml-1 w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14 8-4 4 4 4" />
+                            </svg>
+                            <span>Back</span>
+                        </button>
+
+                        <button type="submit"
+                            :disabled="loading || !form.invoice_id"
+                            class="text-white flex items-center justify-center w-full sm:w-auto bg-primary-600 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <svg v-show="!isEdit" class="mr-1 -ml-1 w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <svg v-show="isEdit" class="mr-1 -ml-1 w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linejoin="round" stroke-width="1.5" d="M4 5a1 1 0 0 1 1-1h11.586a1 1 0 0 1 .707.293l2.414 2.414a1 1 0 0 1 .293.707V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5Z" />
+                                <path stroke="currentColor" stroke-linejoin="round" stroke-width="1" d="M8 4h8v4H8V4Zm7 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            </svg>
+                            <span>{{ loading ? 'Saving...' : (isEdit ? 'Save Changes' : 'Record Payment') }}</span>
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <!-- Actions -->
-            <div class="flex gap-4 mt-6">
-                <button
-                    type="submit"
-                    :disabled="loading || !form.invoice_id"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    {{ loading ? 'Saving...' : (isEdit ? 'Update' : 'Record Payment') }}
-                </button>
-                <button
-                    type="button"
-                    @click="$router.push({ name: 'payments-index' })"
-                    class="bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 px-6 py-2 rounded dark:text-white"
-                >
-                    Cancel
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
 </template>
 
@@ -189,7 +216,6 @@ export default {
             try {
                 const { data } = await dashboardAxios.get('/invoices/unpaid');
                 this.unpaidInvoices = Array.isArray(data) ? data : [];
-                console.log('Loaded unpaid invoices:', this.unpaidInvoices.length);
             } catch (error) {
                 console.error('Failed to load invoices:', error);
                 this.$emit('showToast', 'Failed to load invoices', 'error');
@@ -225,7 +251,7 @@ export default {
             }
         },
         formatCurrency(amount) {
-            return 'Rp ' + Number(amount).toLocaleString('id-ID');
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
         },
         async submit() {
             this.loading = true;
